@@ -841,26 +841,35 @@
 
     <!-- Main Content -->
     <main class="container dashboard-main">
-        <!-- Page Title - Clean Design -->
-        <div class="page-header mb-3">
-            <h1 class="page-title"><?php echo htmlspecialchars($title ?? 'Dashboard'); ?></h1>
+        <!-- Page Title Banner - Modern Design -->
+        <div class="page-title-banner mb-3">
+            <h1 class="page-title-text"><?php echo htmlspecialchars($title ?? 'Dashboard'); ?></h1>
         </div>
 
         <style>
-        .page-header {
-            padding: 0.5rem 0;
+        .page-title-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, #f5a76c 50%, var(--secondary) 100%);
+            border-radius: 2rem;
+            padding: 0.875rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(226, 125, 96, 0.3);
         }
-        .page-title {
-            font-size: 1.35rem;
+        .page-title-text {
+            font-size: 1.25rem;
             font-weight: 700;
-            color: var(--text-dark);
+            color: white;
             margin: 0;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 0.5px;
         }
         @media (max-width: 768px) {
-            .page-header {
-                padding: 0.25rem 0;
+            .page-title-banner {
+                border-radius: 1.5rem;
+                padding: 0.75rem 1.25rem;
+                margin-left: -0.5rem;
+                margin-right: -0.5rem;
             }
-            .page-title {
+            .page-title-text {
                 font-size: 1.1rem;
             }
         }

@@ -16,7 +16,7 @@ class Admin extends CI_Controller {
 
     public function index()
     {
-        $data['title'] = 'Dasbor Admin';
+        $data['title'] = 'Dashboard Admin';
         $data['total_user'] = $this->db->count_all('users');
         $data['total_toko'] = $this->db->count_all('toko');
         $data['toko_menunggu'] = $this->db->where('status_persetujuan', 'menunggu')->count_all_results('toko');
