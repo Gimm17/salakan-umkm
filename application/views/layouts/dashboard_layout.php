@@ -146,15 +146,21 @@
         .stats-card .stats-icon {
             width: 52px;
             height: 52px;
-            background: #f5f5f5;
             border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
-            color: #666;
+            color: white;
             flex-shrink: 0;
         }
+
+        /* Colorful Icon Variants */
+        .stats-icon.icon-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stats-icon.icon-danger { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stats-icon.icon-warning { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        .stats-icon.icon-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stats-icon.icon-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 
         .stats-card .stats-content {
             flex: 1;
@@ -163,7 +169,7 @@
         .stats-card .stats-value {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #2e7d32;
+            color: var(--text-dark);
             line-height: 1.2;
             margin-bottom: 0.125rem;
         }
@@ -175,8 +181,8 @@
         }
 
         /* Stats row spacing */
-        .row.g-4 > [class*="col-"] .stats-card {
-            margin-bottom: 0.5rem;
+        .row.g-2 > [class*="col-"] .stats-card {
+            margin-bottom: 0;
         }
 
         /* Buttons */
@@ -835,20 +841,30 @@
 
     <!-- Main Content -->
     <main class="container dashboard-main">
-        <!-- Page Title -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="page-title fw-bolder"><?php echo htmlspecialchars($title ?? 'Dashboard'); ?></h1>
-            <div class="d-flex align-items-center">
-                <span class="badge bg-primary rounded-pill px-3 py-2 me-3">
-                    <i class="fas fa-user me-1"></i>
-                    <?php echo ucfirst($this->session->userdata('role')); ?>
-                </span>
-                <small class="text-muted">
-                    <i class="fas fa-calendar me-1"></i>
-                    <?php echo date('d F Y'); ?>
-                </small>
-            </div>
+        <!-- Page Title - Clean Design -->
+        <div class="page-header mb-3">
+            <h1 class="page-title"><?php echo htmlspecialchars($title ?? 'Dashboard'); ?></h1>
         </div>
+
+        <style>
+        .page-header {
+            padding: 0.5rem 0;
+        }
+        .page-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 0.25rem 0;
+            }
+            .page-title {
+                font-size: 1.1rem;
+            }
+        }
+        </style>
         
         <!-- Flash Messages -->
         <?php if ($this->session->flashdata('success')): ?>
