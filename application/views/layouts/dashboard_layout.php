@@ -48,13 +48,14 @@
         .header-navbar { 
             background: var(--white);
             box-shadow: 0 2px 20px var(--shadow);
+            padding: 1rem 0;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
 
         .navbar-brand {
             font-weight: 800;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             transition: all 0.3s ease;
         }
 
