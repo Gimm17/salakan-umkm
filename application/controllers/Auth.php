@@ -82,7 +82,10 @@ class Auth extends CI_Controller {
                 'nama' => htmlspecialchars($this->input->post('nama', TRUE)),
                 'email' => htmlspecialchars($this->input->post('email', TRUE)),
                 'password' => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
-                'role' => $this->input->post('role')
+                // Security Fix: Whitelist role untuk mencegah privilege escalation
+                'role' => in_array($this->input->post('role'), ['pengguna', 'penjual']) 
+                          ? $this->input->post('role') 
+                          : 'pengguna'
             );
             
             $user_id = $this->User_model->insert_user($userData);

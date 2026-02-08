@@ -60,6 +60,9 @@ class Ipaymu extends CI_Controller {
     }
 
     public function sys() {
+        // Security: Disable debug endpoint in production
+        if (ENVIRONMENT !== 'development') { show_404(); return; }
+        
         $out = array(
             'php_version' => PHP_VERSION,
             'curl_enabled' => function_exists('curl_init') ? true : false,
@@ -71,6 +74,9 @@ class Ipaymu extends CI_Controller {
     }
 
     public function diag() {
+        // Security: Disable debug endpoint in production
+        if (ENVIRONMENT !== 'development') { show_404(); return; }
+        
         $this->output->set_content_type('application/json');
         $out = array();
         $out['db_connected'] = $this->db->conn_id ? true : false;

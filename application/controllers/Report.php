@@ -7,6 +7,11 @@ class Report extends CI_Controller {
         $this->load->model('Order_model');
         $this->load->library('session');
         $this->load->helper('url');
+
+        // Auth Guard - pastikan user login sebagai penjual
+        if (!$this->session->userdata('is_logged_in') || $this->session->userdata('role') !== 'penjual') {
+            redirect('login');
+        }
     }
 
     public function seller() {

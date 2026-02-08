@@ -1,0 +1,18 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * iPaymu Configuration Template
+ * Copy this file to ipaymu.php and update with your actual credentials.
+ * NEVER commit ipaymu.php with real API keys to version control!
+ * 
+ * For production, set environment variables:
+ * - IPAYMU_VA
+ * - IPAYMU_API_KEY  
+ * - IPAYMU_IS_SANDBOX (set to false for production)
+ */
+
+$config['ipaymu'] = [
+    'va'         => getenv('IPAYMU_VA') ?: 'YOUR_VIRTUAL_ACCOUNT',
+    'api_key'    => getenv('IPAYMU_API_KEY') ?: 'YOUR_API_KEY',
+    'is_sandbox' => (bool) (getenv('IPAYMU_IS_SANDBOX') ?: true),
+];

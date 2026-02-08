@@ -133,8 +133,13 @@ class Produk_model extends CI_Model {
     
     public function get_produk_by_kategori($id_kategori)
     {
+        $this->db->select('produk.*, toko.nama_toko, kategori.nama_kategori');
+        $this->db->from('produk');
+        $this->db->join('toko', 'toko.id = produk.id_toko');
+        $this->db->join('kategori', 'kategori.id = produk.id_kategori');
         $this->db->where('produk.id_kategori', $id_kategori);
-        return $this->get_produk($id_kategori); 
+        $this->db->where('toko.status_persetujuan', 'disetujui');
+        return $this->db->get()->result_array();
     }
     
     public function get_produk_by_toko($id_toko)

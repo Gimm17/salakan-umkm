@@ -14,6 +14,15 @@ class Seller extends CI_Controller {
         // Mengambil ID toko milik penjual yang sedang login
         $toko = $this->Toko_model->get_toko_by_user_id($this->session->userdata('id'));
         $this->toko_id = $toko ? $toko['id'] : NULL;
+
+        // Auth Guard - pastikan user login sebagai penjual dengan toko disetujui
+        if (!$this->session->userdata('is_logged_in') || $this->session->userdata('role') !== 'penjual') {
+            redirect('login');
+        }
+        if (!$this->toko_id) {
+            $this->session->set_flashdata('error', 'Toko Anda belum disetujui admin.');
+            redirect('login');
+        }
     }
 
     /**

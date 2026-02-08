@@ -1,11 +1,16 @@
-<?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * Email Configuration Template
+ * Copy this file to email.php and update with your actual credentials.
+ * NEVER commit email.php with real credentials to version control!
+ */
 
 $config['protocol']  = 'smtp';
 $config['smtp_host'] = 'ssl://smtp.googlemail.com';
 $config['smtp_port'] = 465;
-$config['smtp_user'] = 'salakanumkm@gmail.com'; // GANTI DENGAN ALAMAT GMAIL ANDA
-$config['smtp_pass'] = 'ggqbqccaljnxxegf'; // GANTI DENGAN 16 KARAKTER SANDI APLIKASI
+$config['smtp_user'] = 'your-email@gmail.com';     // GANTI DENGAN ALAMAT GMAIL ANDA
+$config['smtp_pass'] = 'your-app-password';        // GANTI DENGAN 16 KARAKTER SANDI APLIKASI
 $config['mailtype']  = 'html';
 $config['charset']   = 'utf-8';
 $config['newline']   = "\r\n";
