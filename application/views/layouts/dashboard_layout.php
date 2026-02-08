@@ -406,42 +406,127 @@
             overflow-x: hidden;
         }
 
-        /* Responsive Design */
+        /* ========================================
+           MOBILE DASHBOARD REDESIGN 
+           ======================================== */
+        
         @media (max-width: 768px) {
+            /* Compact Dashboard Main */
+            .dashboard-main {
+                padding: 0.75rem 0;
+            }
+
+            /* Minimalist Page Header */
+            .d-flex.justify-content-between.align-items-center.mb-4 {
+                flex-direction: row !important;
+                align-items: center !important;
+                margin-bottom: 1rem !important;
+                padding: 0;
+            }
+
+            .page-title {
+                font-size: 1.25rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* Hide role badge on mobile - shown in drawer */
+            .d-flex.justify-content-between.align-items-center.mb-4 .badge,
+            .d-flex.justify-content-between.align-items-center.mb-4 small {
+                display: none !important;
+            }
+
+            /* Compact Stats Cards - Horizontal Layout */
+            .stats-card {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                text-align: left !important;
+                padding: 0.875rem 1rem !important;
+                margin-bottom: 0.5rem !important;
+                border-radius: 0.75rem;
+            }
+
+            .stats-card .stats-icon {
+                width: 42px;
+                height: 42px;
+                margin: 0 !important;
+                margin-right: 0.875rem !important;
+                flex-shrink: 0;
+                font-size: 1.1rem;
+            }
+
+            .stats-card h3, 
+            .stats-card h4,
+            .stats-card .stats-value {
+                font-size: 1.25rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            .stats-card p,
+            .stats-card small,
+            .stats-card .stats-label {
+                font-size: 0.75rem !important;
+                margin-bottom: 0 !important;
+                opacity: 0.9;
+            }
+
+            .stats-card-content {
+                flex: 1;
+            }
+
+            /* Disable hover effects on mobile */
+            .stats-card:hover {
+                transform: none !important;
+            }
+
+            .stats-card:hover .stats-icon {
+                transform: none !important;
+            }
+
+            /* Compact Cards */
+            .card {
+                margin-bottom: 0.75rem !important;
+                border-radius: 0.75rem !important;
+            }
+
+            .card-header {
+                padding: 0.875rem 1rem !important;
+            }
+
+            .card-body {
+                padding: 0.875rem 1rem !important;
+            }
+
+            /* Compact Buttons */
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .btn-sm {
+                padding: 0.35rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            /* Header Navbar Compact */
             .header-navbar .nav-link {
                 margin: 0.25rem 0;
                 text-align: center;
             }
-            
-            .dashboard-main {
-                padding: 1rem 0;
-            }
-            
-            .stats-card {
-                margin-bottom: 1rem;
-            }
-            
-            .card {
-                margin-bottom: 1.5rem;
+
+            /* Quick Actions Grid */
+            .quick-action {
+                padding: 1rem;
+                margin-bottom: 0.5rem;
             }
 
-            /* P0 FIX: Dashboard page title stacking */
-            .d-flex.justify-content-between.align-items-center.mb-4 {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 0.75rem;
+            .quick-action .action-icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 0.5rem;
             }
 
-            .d-flex.justify-content-between.align-items-center.mb-4 .d-flex {
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-
-            /* P0 FIX: Table responsive - card view on mobile */
-            .table-responsive-mobile {
-                display: block;
-            }
-
+            /* Table Mobile Card View */
             .table-responsive-mobile thead {
                 display: none;
             }
@@ -449,19 +534,20 @@
             .table-responsive-mobile tbody tr {
                 display: block;
                 background: var(--white);
-                border-radius: 1rem;
-                margin-bottom: 1rem;
-                padding: 1rem;
-                box-shadow: 0 4px 15px var(--shadow);
+                border-radius: 0.75rem;
+                margin-bottom: 0.5rem;
+                padding: 0.75rem;
+                box-shadow: 0 2px 8px var(--shadow);
             }
 
             .table-responsive-mobile tbody td {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 0.5rem 0;
+                padding: 0.4rem 0;
                 border: none;
-                border-bottom: 1px solid rgba(62, 39, 35, 0.1);
+                border-bottom: 1px solid rgba(62, 39, 35, 0.08);
+                font-size: 0.875rem;
             }
 
             .table-responsive-mobile tbody td:last-child {
@@ -472,44 +558,58 @@
                 content: attr(data-label);
                 font-weight: 600;
                 color: var(--text-dark);
-                margin-right: 1rem;
+                font-size: 0.8rem;
             }
 
-            /* P2 FIX: Quick action cards single column on mobile */
-            .quick-action {
-                margin-bottom: 1rem;
+            /* Footer Compact */
+            .footer {
+                padding: 0.75rem 0;
+            }
+
+            .footer .row {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer .col-md-6 {
+                margin-bottom: 0.5rem;
+            }
+
+            .footer small {
+                font-size: 0.75rem;
             }
         }
 
-        /* P1 FIX: Extra small phones (360px and below) */
+        /* Extra Small Phones */
         @media (max-width: 360px) {
             .container {
-                padding-left: 0.75rem !important;
-                padding-right: 0.75rem !important;
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
             }
 
             .page-title {
-                font-size: 1.25rem !important;
-            }
-
-            .badge {
-                font-size: 0.7rem;
-                padding: 0.35rem 0.75rem;
+                font-size: 1.1rem !important;
             }
 
             .stats-card {
-                padding: 1rem;
+                padding: 0.75rem !important;
             }
 
             .stats-card .stats-icon {
-                width: 45px;
-                height: 45px;
-                font-size: 1.2rem;
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
             }
 
-            .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.875rem;
+            .stats-card h3,
+            .stats-card h4,
+            .stats-card .stats-value {
+                font-size: 1.1rem !important;
+            }
+
+            .card-header,
+            .card-body {
+                padding: 0.75rem !important;
             }
         }
 
@@ -550,10 +650,14 @@
                         <i class="fas fa-tachometer-alt me-2"></i>
                         <span style="color: var(--text-dark);">UMKM</span><span style="color: var(--primary);">Banggai</span>
                     </a>
-                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarDashboard" aria-controls="navbarDashboard" aria-expanded="false" aria-label="Toggle navigation">
+                    
+                    <!-- Mobile: Off-Canvas Trigger -->
+                    <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashboardMobileNav" aria-controls="dashboardMobileNav">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-                    <div class="collapse navbar-collapse" id="navbarDashboard">
+                    
+                    <!-- Desktop Navigation -->
+                    <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarDashboard">
                         <?php 
                             $role = $this->session->userdata('role');
                             $controller = $this->router->fetch_class();
@@ -594,26 +698,20 @@
                                 </li>
                             <?php endif; ?>
                         </ul>
-                            <ul class="navbar-nav ms-auto">
+                        <ul class="navbar-nav ms-auto">
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <!-- ================================================================== -->
-                                    <!-- PERUBAHAN DIMULAI: Logika untuk menampilkan foto profil dinamis -->
-                                    <!-- ================================================================== -->
-                                        <?php
-                                            $foto = $this->session->userdata('foto');
-                                            $foto_url = base_url('public/img/profile/' . $foto);
-                                        ?>
-                                        <?php if ($foto && file_exists(FCPATH . 'public/img/profile/' . $foto)): ?>
-                                            <img src="<?php echo $foto_url; ?>" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" alt="Foto Profil">
-                                        <?php else: ?>
-                                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                                                <i class="fas fa-user fa-sm text-white"></i>
-                                            </div>
-                                        <?php endif; ?>
-                                    <!-- ================================================================== -->
-                                    <!-- PERUBAHAN SELESAI -->
-                                    <!-- ================================================================== -->
+                                    <?php
+                                        $foto = $this->session->userdata('foto');
+                                        $foto_url = base_url('public/img/profile/' . $foto);
+                                    ?>
+                                    <?php if ($foto && file_exists(FCPATH . 'public/img/profile/' . $foto)): ?>
+                                        <img src="<?php echo $foto_url; ?>" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" alt="Foto Profil">
+                                    <?php else: ?>
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="fas fa-user fa-sm text-white"></i>
+                                        </div>
+                                    <?php endif; ?>
                                     <span class="fw-bold"><?php echo htmlspecialchars($this->session->userdata('nama')); ?></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -645,6 +743,117 @@
                 </div>
             </nav>
         </header>
+
+        <!-- Mobile Off-Canvas Dashboard Menu -->
+        <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="dashboardMobileNav" aria-labelledby="dashboardMobileNavLabel">
+            <div class="offcanvas-header border-bottom py-3">
+                <h6 class="offcanvas-title fw-bold mb-0" id="dashboardMobileNavLabel">
+                    <i class="fas fa-tachometer-alt me-2 text-primary"></i>Menu Dashboard
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column p-0">
+                <!-- User Profile Card -->
+                <div class="p-3 bg-light border-bottom">
+                    <div class="d-flex align-items-center">
+                        <?php if ($foto && file_exists(FCPATH . 'public/img/profile/' . $foto)): ?>
+                            <img src="<?php echo $foto_url; ?>" class="rounded-circle me-3" style="width: 48px; height: 48px; object-fit: cover;" alt="Foto">
+                        <?php else: ?>
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div>
+                            <div class="fw-bold"><?php echo htmlspecialchars($this->session->userdata('nama')); ?></div>
+                            <span class="badge bg-primary rounded-pill text-capitalize"><?php echo $role; ?></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <nav class="flex-grow-1 p-2">
+                    <?php if ($role == 'admin'): ?>
+                        <a class="mobile-dash-link <?php echo ($controller == 'admin' && $this->uri->segment(2) == '') ? 'active' : ''; ?>" href="<?php echo site_url('admin'); ?>">
+                            <i class="fas fa-home fa-fw"></i>Dashboard
+                        </a>
+                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'manajemen_pengguna') ? 'active' : ''; ?>" href="<?php echo site_url('admin/manajemen_pengguna'); ?>">
+                            <i class="fas fa-users fa-fw"></i>Pengguna
+                        </a>
+                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'manajemen_toko') ? 'active' : ''; ?>" href="<?php echo site_url('admin/manajemen_toko'); ?>">
+                            <i class="fas fa-store fa-fw"></i>Toko
+                        </a>
+                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'manajemen_kategori') ? 'active' : ''; ?>" href="<?php echo site_url('admin/manajemen_kategori'); ?>">
+                            <i class="fas fa-tags fa-fw"></i>Kategori
+                        </a>
+                    <?php elseif ($role == 'penjual'): ?>
+                        <a class="mobile-dash-link <?php echo ($controller == 'seller' && ($this->uri->segment(2) == '' || $this->uri->segment(2) == 'dashboard')) ? 'active' : ''; ?>" href="<?php echo site_url('seller'); ?>">
+                            <i class="fas fa-tachometer-alt fa-fw"></i>Dashboard
+                        </a>
+                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'produk') ? 'active' : ''; ?>" href="<?php echo site_url('seller/produk'); ?>">
+                            <i class="fas fa-box-open fa-fw"></i>Produk
+                        </a>
+                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'toko' || $this->uri->segment(2) == 'pengaturan_toko') ? 'active' : ''; ?>" href="<?php echo site_url('seller/toko'); ?>">
+                            <i class="fas fa-store-alt fa-fw"></i>Toko
+                        </a>
+                    <?php else: ?>
+                        <a class="mobile-dash-link <?php echo ($controller == 'user' && ($this->uri->segment(2) == '' || $this->uri->segment(2) == 'dashboard')) ? 'active' : ''; ?>" href="<?php echo site_url('user'); ?>">
+                            <i class="fas fa-home fa-fw"></i>Dashboard
+                        </a>
+                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'favorit') ? 'active' : ''; ?>" href="<?php echo site_url('user/favorit'); ?>">
+                            <i class="fas fa-heart fa-fw"></i>Favorit
+                        </a>
+                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'profile') ? 'active' : ''; ?>" href="<?php echo site_url('user/profile'); ?>">
+                            <i class="fas fa-user fa-fw"></i>Profil
+                        </a>
+                    <?php endif; ?>
+                </nav>
+                
+                <!-- Footer Actions -->
+                <div class="p-3 border-top mt-auto">
+                    <a href="<?php echo $profile_url; ?>" class="btn btn-outline-primary w-100 rounded-pill mb-2">
+                        <i class="fas fa-user-edit me-2"></i>Edit Profil
+                    </a>
+                    <a href="<?php echo site_url('auth/logout'); ?>" class="btn btn-outline-danger w-100 rounded-pill">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        /* Mobile Dashboard Off-Canvas */
+        .offcanvas {
+            max-width: 280px;
+        }
+        
+        .mobile-dash-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-dash-link:hover {
+            background: rgba(226, 125, 96, 0.1);
+            color: var(--primary);
+        }
+        
+        .mobile-dash-link.active {
+            background: var(--gradient);
+            color: white;
+        }
+        
+        .mobile-dash-link i {
+            width: 20px;
+            text-align: center;
+        }
+        </style>
 
     <!-- Main Content -->
     <main class="container dashboard-main">
