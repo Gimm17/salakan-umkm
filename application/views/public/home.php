@@ -31,9 +31,9 @@
             <!-- Desktop view - show all 3 cards -->
             <div class="row g-3 g-md-4 d-none d-md-flex">
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-soft text-center p-2 p-md-4">
-                        <div class="card-body">
-                            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-2 mb-md-3" style="width: 50px; height: 50px;">
+                    <div class="card border-0 shadow-soft text-center p-2 p-md-4 h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-2 mb-md-3 mx-auto" style="width: 50px; height: 50px;">
                                 <i class="fas fa-box text-white fs-6 fs-md-4"></i>
                             </div>
                             <h6 class="h6 h5-md fw-bold">Produk Berkualitas</h6>
@@ -42,9 +42,9 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-soft text-center p-2 p-md-4">
-                        <div class="card-body">
-                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-2 mb-md-3" style="width: 50px; height: 50px;">
+                    <div class="card border-0 shadow-soft text-center p-2 p-md-4 h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-2 mb-md-3 mx-auto" style="width: 50px; height: 50px;">
                                 <i class="fas fa-handshake text-white fs-6 fs-md-4"></i>
                             </div>
                             <h6 class="h6 h5-md fw-bold">Mendukung Lokal</h6>
@@ -53,9 +53,9 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-soft text-center p-2 p-md-4">
-                        <div class="card-body">
-                            <div class="rounded-circle accent-bg d-inline-flex align-items-center justify-content-center mb-2 mb-md-3" style="width: 50px; height: 50px;">
+                    <div class="card border-0 shadow-soft text-center p-2 p-md-4 h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="rounded-circle accent-bg d-inline-flex align-items-center justify-content-center mb-2 mb-md-3 mx-auto" style="width: 50px; height: 50px;">
                                 <i class="fas fa-heart text-dark fs-6 fs-md-4"></i>
                             </div>
                             <h6 class="h6 h5-md fw-bold">Dibuat dengan Cinta</h6>
