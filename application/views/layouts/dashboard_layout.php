@@ -37,6 +37,9 @@
             background-color: var(--bg-ivory);
             color: var(--text-dark);
             line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         h1, h2, h3, h4, h5, h6, .fw-bold, .fw-bolder { 
@@ -48,7 +51,7 @@
         .header-navbar { 
             background: var(--white);
             box-shadow: 0 2px 20px var(--shadow);
-            padding: 1rem 0;
+            padding: 0.25rem 0;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
@@ -95,7 +98,7 @@
 
         /* Main Content */
         .dashboard-main {
-            min-height: calc(100vh - 200px);
+            flex-grow: 1;
             padding: 2rem 0;
         }
 
