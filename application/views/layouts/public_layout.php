@@ -389,6 +389,11 @@
             animation: fadeInUp 0.6s ease-out;
         }
 
+        /* P0 FIX: Prevent horizontal scroll */
+        html, body {
+            overflow-x: hidden;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-banner {
@@ -396,7 +401,7 @@
             }
             
             .hero-banner h1 {
-                font-size: 2rem;
+                font-size: 1.75rem;
             }
             
             .product-card, .store-card {
@@ -405,6 +410,68 @@
 
             .navbar-nav .nav-link {
                 margin: 0.25rem 0;
+                padding: 0.75rem 1rem; /* P0 FIX: Better tap targets */
+            }
+
+            /* P0 FIX: Login/Register buttons stacking */
+            .navbar-nav.align-items-center {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .navbar-nav .btn {
+                width: 100%;
+                margin: 0.25rem 0 !important;
+            }
+        }
+
+        /* P1 FIX: Small phones */
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+
+            .hero-banner h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero-banner p {
+                font-size: 0.9rem;
+            }
+
+            .btn-primary, .btn-outline-primary {
+                padding: 0.6rem 1.25rem;
+                font-size: 0.9rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+        /* P1 FIX: Extra small phones */
+        @media (max-width: 360px) {
+            .container {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+
+            .hero-banner {
+                padding: 1.5rem 0.75rem;
+            }
+
+            .hero-banner h1 {
+                font-size: 1.3rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.35rem 0.6rem;
             }
         }
 

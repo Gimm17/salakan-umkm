@@ -291,6 +291,16 @@ document.addEventListener('DOMContentLoaded', function() {
     transition: color 0.3s ease;
 }
 
+/* P0 FIX: Password toggle tap target size */
+.btn-link.position-absolute {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .btn-link:hover {
     color: var(--primary);
 }

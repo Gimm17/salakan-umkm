@@ -401,6 +401,11 @@
             transform: scale(1.2) rotate(360deg);
         }
 
+        /* P0 FIX: Prevent horizontal overflow on all screens */
+        html, body {
+            overflow-x: hidden;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .header-navbar .nav-link {
@@ -418,6 +423,93 @@
             
             .card {
                 margin-bottom: 1.5rem;
+            }
+
+            /* P0 FIX: Dashboard page title stacking */
+            .d-flex.justify-content-between.align-items-center.mb-4 {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.75rem;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mb-4 .d-flex {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            /* P0 FIX: Table responsive - card view on mobile */
+            .table-responsive-mobile {
+                display: block;
+            }
+
+            .table-responsive-mobile thead {
+                display: none;
+            }
+
+            .table-responsive-mobile tbody tr {
+                display: block;
+                background: var(--white);
+                border-radius: 1rem;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                box-shadow: 0 4px 15px var(--shadow);
+            }
+
+            .table-responsive-mobile tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border: none;
+                border-bottom: 1px solid rgba(62, 39, 35, 0.1);
+            }
+
+            .table-responsive-mobile tbody td:last-child {
+                border-bottom: none;
+            }
+
+            .table-responsive-mobile tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--text-dark);
+                margin-right: 1rem;
+            }
+
+            /* P2 FIX: Quick action cards single column on mobile */
+            .quick-action {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* P1 FIX: Extra small phones (360px and below) */
+        @media (max-width: 360px) {
+            .container {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+
+            .page-title {
+                font-size: 1.25rem !important;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.35rem 0.75rem;
+            }
+
+            .stats-card {
+                padding: 1rem;
+            }
+
+            .stats-card .stats-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
             }
         }
 

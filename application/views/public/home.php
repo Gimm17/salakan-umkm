@@ -149,7 +149,7 @@
                             </span>
                         </div>
                         <div class="card-body p-2 p-md-3 d-flex flex-column">
-                        <h6 class="card-title fw-bold text-dark mb-1 small" style="flex-grow: 1; line-height: 1.1; min-height: 2.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                        <h6 class="card-title fw-bold text-dark mb-1 small" style="flex-grow: 1; line-height: 1.1; min-height: 2.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;">
                             <a href="<?php echo site_url('produk/' . $produk['id']); ?>" 
                             class="text-decoration-none text-dark stretched-link">
                                 <?php echo htmlspecialchars(strlen($produk['nama_produk']) > 25 ? substr($produk['nama_produk'], 0, 25) . '...' : $produk['nama_produk']); ?>
