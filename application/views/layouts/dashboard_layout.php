@@ -628,8 +628,8 @@
     <body>
         <!-- Enhanced Header -->
         <header class="header-navbar sticky-top">
-            <nav class="navbar navbar-expand-lg container">
-                <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container">
                     <a class="navbar-brand fw-bold" href="<?php echo site_url('/'); ?>">
                         <i class="fas fa-tachometer-alt me-2"></i>
                         <span style="color: var(--text-dark);">UMKM</span><span style="color: var(--primary);">Banggai</span>
