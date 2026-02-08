@@ -1,6 +1,6 @@
 <!-- Judul Halaman -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="text-dark fw-bold mb-0">Dasbor Penjual</h3>
+    <h3 class="text-dark fw-bold mb-0">Dashboard Penjual</h3>
 </div>
 
 <!-- Welcome Message -->

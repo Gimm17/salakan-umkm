@@ -30,7 +30,7 @@ class Seller extends CI_Controller {
      */
     public function index()
     {
-        $data['title'] = 'Dasbor Penjual';
+        $data['title'] = 'Dashboard Penjual';
         $toko = $this->Toko_model->get_toko_by_user_id($this->session->userdata('id'));
         $toko_id = $toko ? $toko['id'] : 0;
         $data['total_produk'] = $this->Produk_model->count_by_toko($toko_id);

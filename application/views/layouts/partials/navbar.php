@@ -50,7 +50,7 @@ $segment1 = $this->uri->segment(1);
                             ?>
                             <li>
                                 <a class="dropdown-item" href="<?php echo $dashboard_url; ?>">
-                                    <i class="fas fa-tachometer-alt fa-fw me-2 text-muted"></i>Dasbor
+                                    <i class="fas fa-tachometer-alt fa-fw me-2 text-muted"></i>Dashboard
                                 </a>
                             </li>
                             <?php if($role == 'pengguna'): ?>
@@ -131,7 +131,7 @@ $segment1 = $this->uri->segment(1);
                 </div>
                 <div class="d-grid gap-2">
                     <a href="<?php echo $dashboard_url; ?>" class="btn btn-primary rounded-pill">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dasbor
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                     </a>
                     <a href="<?php echo site_url('auth/logout'); ?>" class="btn btn-outline-danger rounded-pill">
                         <i class="fas fa-sign-out-alt me-2"></i>Logout
