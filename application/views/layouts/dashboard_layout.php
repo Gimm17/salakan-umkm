@@ -123,55 +123,60 @@
             padding: 1.5rem;
         }
 
-        /* Stats Cards */
+        /* ========================================
+           CLEAN STATS CARDS - Minimal Design
+           ======================================== */
         .stats-card {
-            background: var(--gradient);
-            color: var(--white);
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-radius: 1rem;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stats-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-
-        .stats-card:hover::before {
-            transform: translateX(100%);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .stats-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
         }
 
         .stats-card .stats-icon {
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            background: #f5f5f5;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
+            font-size: 1.25rem;
+            color: #666;
+            flex-shrink: 0;
         }
 
-        .stats-card:hover .stats-icon {
-            transform: scale(1.1) rotate(360deg);
-            background: rgba(255,255,255,0.3);
+        .stats-card .stats-content {
+            flex: 1;
+        }
+
+        .stats-card .stats-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2e7d32;
+            line-height: 1.2;
+            margin-bottom: 0.125rem;
+        }
+
+        .stats-card .stats-label {
+            font-size: 0.85rem;
+            color: #888;
+            font-weight: 400;
+        }
+
+        /* Stats row spacing */
+        .row.g-4 > [class*="col-"] .stats-card {
+            margin-bottom: 0.5rem;
         }
 
         /* Buttons */
@@ -435,52 +440,25 @@
                 display: none !important;
             }
 
-            /* Compact Stats Cards - Horizontal Layout */
+            /* Mobile Stats Cards - Clean Style */
             .stats-card {
-                display: flex !important;
-                flex-direction: row !important;
-                align-items: center !important;
-                text-align: left !important;
-                padding: 0.875rem 1rem !important;
-                margin-bottom: 0.5rem !important;
-                border-radius: 0.75rem;
+                padding: 1rem !important;
+                gap: 0.75rem !important;
+                margin-bottom: 0.375rem !important;
             }
 
             .stats-card .stats-icon {
-                width: 42px;
-                height: 42px;
-                margin: 0 !important;
-                margin-right: 0.875rem !important;
-                flex-shrink: 0;
+                width: 44px;
+                height: 44px;
                 font-size: 1.1rem;
             }
 
-            .stats-card h3, 
-            .stats-card h4,
             .stats-card .stats-value {
                 font-size: 1.25rem !important;
-                margin-bottom: 0 !important;
             }
 
-            .stats-card p,
-            .stats-card small,
             .stats-card .stats-label {
-                font-size: 0.75rem !important;
-                margin-bottom: 0 !important;
-                opacity: 0.9;
-            }
-
-            .stats-card-content {
-                flex: 1;
-            }
-
-            /* Disable hover effects on mobile */
-            .stats-card:hover {
-                transform: none !important;
-            }
-
-            .stats-card:hover .stats-icon {
-                transform: none !important;
+                font-size: 0.8rem !important;
             }
 
             /* Compact Cards */
