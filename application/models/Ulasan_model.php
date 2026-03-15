@@ -38,7 +38,7 @@ class Ulasan_model extends CI_Model {
         $this->db->from('orders o');
         $this->db->join('order_items oi', 'o.order_id = oi.order_id');
         $this->db->where('o.id_user', $id_user);
-        $this->db->where('oi.id_produk', $id_produk);
+        $this->db->where('oi.produk_id', $id_produk);
         $this->db->where_in('o.status', ['paid', 'settlement', 'capture']);
         $result_buy = $this->db->get()->row();
         
