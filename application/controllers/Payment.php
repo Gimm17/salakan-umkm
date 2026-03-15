@@ -141,10 +141,15 @@ class Payment extends CI_Controller {
             }
         }
 
+        // Buat Midtrans order_id unik — untuk repay tambahkan suffix agar Midtrans tidak reject
+        $midtrans_order_id = $repay_order_id
+            ? $order_id . '-R' . substr(time(), -4)
+            : $order_id;
+
         // Payload Midtrans Snap
         $payload = array(
             'transaction_details' => array(
-                'order_id'     => $order_id,
+                'order_id'     => $midtrans_order_id,
                 'gross_amount' => $gross,
             ),
             'customer_details' => array(
