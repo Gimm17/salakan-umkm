@@ -253,7 +253,7 @@ $status_info = [
           </div>
           <?php endif; ?>
 
-          <div class="d-flex flex-wrap gap-2">
+          <div class="d-flex flex-wrap gap-2 align-items-center">
             <!-- Tombol Bayar Sekarang untuk pending yang masih bisa dibayar -->
             <?php if($can_repay && !empty($items)):
               $produk_id = $items[0]['produk_id'] ?? 0;
@@ -265,7 +265,7 @@ $status_info = [
             <?php endif; ?>
 
             <a href="<?php echo site_url('payment/success?order_id=' . urlencode($order['order_id'])); ?>"
-               class="btn btn-sm btn-outline-secondary rounded-pill">
+               class="btn btn-sm btn-outline-secondary rounded-pill d-inline-flex align-items-center">
               <i class="fas fa-receipt me-1"></i>Receipt
             </a>
 
@@ -278,7 +278,7 @@ $status_info = [
             <?php if($order['status'] === 'paid' && !empty($items)): 
                $id_produk_ulasan = $items[0]['id_produk'] ?? ($items[0]['produk_id'] ?? 0);
             ?>
-            <a href="<?php echo site_url('produk/' . $id_produk_ulasan . '#reviewForm'); ?>" class="btn btn-sm btn-outline-primary rounded-pill">
+            <a href="<?php echo site_url('produk/' . $id_produk_ulasan . '#reviewForm'); ?>" class="btn btn-sm btn-outline-primary rounded-pill d-inline-flex align-items-center">
               <i class="fas fa-star me-1"></i>Beri Ulasan
             </a>
             <?php endif; ?>
