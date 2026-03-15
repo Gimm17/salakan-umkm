@@ -268,11 +268,13 @@
                             <i class="fas fa-share-alt"></i>
                         </button>
                     
-<!-- iPaymu Direct Checkout -->
+<!-- Checkout Page Link -->
 <div class="mt-3 d-grid">
-  <button id="btn-bayar-sekarang" class="btn btn-primary btn-lg rounded-pill">
-    <i class="fas fa-credit-card me-2"></i> Bayar Sekarang
-  </button>
+  <a href="<?php echo site_url('payment/checkout/' . $produk['id']); ?>"
+     id="btn-bayar-sekarang"
+     class="btn btn-primary btn-lg rounded-pill text-decoration-none text-center">
+    <i class="fas fa-shopping-cart me-2"></i> Bayar Sekarang
+  </a>
 </div>
 </div>
                     <?php elseif(!$this->session->userdata('is_logged_in')): ?>

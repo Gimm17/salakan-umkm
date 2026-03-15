@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Payment Controller - Midtrans Snap Integration
- * Menggantikan iPaymu sepenuhnya
+ * Flow: produk_detail → checkout (form) → payment/create (AJAX token) → snap.pay() → payment/success
  */
 class Payment extends CI_Controller {
 
@@ -12,12 +12,13 @@ class Payment extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->helper(array('url', 'security'));
-        $this->load->library(array('session'));
+        $this->load->library(array('session', 'email'));
         $this->load->model(array('Order_model', 'Produk_model', 'Toko_model'));
+
+        // Load config — hardcoded fallback jika config section tidak terbaca
         $this->config->load('midtrans', TRUE);
         $cfg = $this->config->item('midtrans', 'midtrans');
-        if (!$cfg) {
-            // fallback langsung hardcode jika config section tidak terbaca
+        if (!$cfg || empty($cfg['server_key'])) {
             $cfg = array(
                 'merchant_id' => 'G331745803',
                 'client_key'  => 'CHANGE_ME_MIDTRANS_CLIENT_KEY',
@@ -26,13 +27,33 @@ class Payment extends CI_Controller {
             );
         }
         $this->mt = $cfg;
-        if (method_exists($this->Order_model, 'ensure_tables')) {
-            $this->Order_model->ensure_tables();
-        }
     }
 
     /**
-     * GET token Midtrans Snap — dipanggil via AJAX dari tombol Bayar Sekarang
+     * Halaman checkout — form detail pembeli sebelum bayar
+     */
+    public function checkout($produk_id = 0) {
+        $produk_id = (int) ($produk_id ?: $this->input->get('produk_id'));
+        if (!$produk_id) show_404();
+
+        $produk = $this->Produk_model->get_produk($produk_id);
+        if (!$produk) show_404();
+
+        $toko = $this->Toko_model->get_toko($produk['id_toko']);
+
+        $data = array(
+            'title'  => 'Checkout — ' . $produk['nama_produk'],
+            'produk' => $produk,
+            'toko'   => $toko,
+        );
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar',  $data);
+        $this->load->view('public/checkout',   $data);
+        $this->load->view('templates/footer',  $data);
+    }
+
+    /**
+     * GET token Midtrans Snap — dipanggil via AJAX dari form checkout
      */
     public function create() {
         $this->output->set_content_type('application/json');
@@ -42,8 +63,18 @@ class Payment extends CI_Controller {
             return;
         }
 
-        $produk_id = (int) $this->input->post('produk_id', TRUE);
-        $qty       = max(1, (int) $this->input->post('qty', TRUE));
+        $produk_id    = (int) $this->input->post('produk_id', TRUE);
+        $qty          = max(1, (int) $this->input->post('qty', TRUE));
+        $buyer_name   = trim($this->input->post('buyer_name',    TRUE));
+        $buyer_wa     = trim($this->input->post('buyer_wa',      TRUE));
+        $buyer_address= trim($this->input->post('buyer_address', TRUE));
+        $buyer_city   = trim($this->input->post('buyer_city',    TRUE));
+        $buyer_note   = trim($this->input->post('buyer_note',    TRUE));
+
+        if (!$buyer_name || !$buyer_wa) {
+            $this->output->set_status_header(400)->set_output(json_encode(array('error' => 'Nama dan WhatsApp wajib diisi')));
+            return;
+        }
 
         $produk = $this->Produk_model->get_produk($produk_id);
         if (!$produk) {
@@ -51,28 +82,43 @@ class Payment extends CI_Controller {
             return;
         }
 
-        $order_id  = 'ORDER-' . date('YmdHis') . '-' . mt_rand(1000, 9999);
+        $toko      = $this->Toko_model->get_toko($produk['id_toko']);
+        $order_id  = 'ORDER-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
         $buyer_id  = (int) ($this->session->userdata('id') ?: 0);
         $gross     = (int) $produk['harga'] * $qty;
-        $buyer_name  = $this->session->userdata('nama')  ?: 'Guest';
         $buyer_email = $this->session->userdata('email') ?: 'guest@example.com';
 
         // Simpan order ke DB lokal
-        $order = array(
-            'order_id'    => $order_id,
-            'id_toko'     => $produk['id_toko'],
-            'id_user'     => $buyer_id,
-            'total'       => $gross,
-            'status'      => 'pending',
-            'buyer_email' => $buyer_email,
-            'buyer_name'  => $buyer_name,
+        $order_data = array(
+            'order_id'      => $order_id,
+            'id_toko'       => $produk['id_toko'],
+            'id_user'       => $buyer_id,
+            'total'         => $gross,
+            'status'        => 'pending',
+            'buyer_name'    => $buyer_name,
+            'buyer_email'   => $buyer_email,
+            'buyer_wa'      => $buyer_wa,
+            'buyer_address' => $buyer_address,
+            'buyer_city'    => $buyer_city,
+            'buyer_note'    => $buyer_note,
         );
-        $this->Order_model->create_order_with_item($order, array(
+        $item_data = array(
             'produk_id'   => $produk['id'],
             'nama_produk' => $produk['nama_produk'],
             'price'       => (int) $produk['harga'],
             'qty'         => $qty,
-        ));
+        );
+
+        if (method_exists($this->Order_model, 'create_order_with_item')) {
+            $this->Order_model->create_order_with_item($order_data, $item_data);
+        } else {
+            $this->db->insert('orders', $order_data);
+            $inserted_id = $this->db->insert_id();
+            if ($inserted_id) {
+                $item_data['order_id'] = $order_id;
+                $this->db->insert('order_items', $item_data);
+            }
+        }
 
         // Payload Midtrans Snap
         $payload = array(
@@ -83,6 +129,12 @@ class Payment extends CI_Controller {
             'customer_details' => array(
                 'first_name' => $buyer_name,
                 'email'      => $buyer_email,
+                'phone'      => $buyer_wa,
+                'billing_address' => array(
+                    'address'   => $buyer_address,
+                    'city'      => $buyer_city,
+                    'country_code' => 'IDN',
+                ),
             ),
             'item_details' => array(
                 array(
@@ -93,7 +145,7 @@ class Payment extends CI_Controller {
                 ),
             ),
             'callbacks' => array(
-                'finish' => site_url('payment/finish?order_id=' . $order_id),
+                'finish' => site_url('payment/success?order_id=' . $order_id),
             ),
         );
 
@@ -114,56 +166,100 @@ class Payment extends CI_Controller {
     }
 
     /**
+     * Halaman sukses / receipt setelah pembayaran
+     */
+    public function success() {
+        $order_id  = $this->input->get('order_id', TRUE) ?: $this->session->userdata('last_order_id');
+        $status_in = $this->input->get('transaction_status', TRUE) ?: 'pending';
+
+        $order      = null;
+        $order_items = array();
+        $toko        = null;
+
+        if ($order_id) {
+            if (method_exists($this->Order_model, 'find_by_order_id')) {
+                $order = $this->Order_model->find_by_order_id($order_id);
+            } else {
+                $order = $this->db->where('order_id', $order_id)->get('orders')->row_array();
+            }
+
+            if ($order) {
+                // Update status jika confirmed
+                if (in_array($status_in, array('settlement', 'capture'))) {
+                    $new_status = 'paid';
+                    if (method_exists($this->Order_model, 'update_by_order_id')) {
+                        $this->Order_model->update_by_order_id($order_id, array('status' => 'paid'));
+                    } else {
+                        $this->db->where('order_id', $order_id)->update('orders', array('status' => 'paid'));
+                    }
+                    $order['status'] = 'paid';
+                }
+
+                // Ambil items
+                if (method_exists($this->Order_model, 'get_items')) {
+                    $order_items = $this->Order_model->get_items($order_id);
+                } else {
+                    $order_items = $this->db->where('order_id', $order_id)->get('order_items')->result_array();
+                }
+
+                // Ambil toko
+                if (!empty($order['id_toko'])) {
+                    $toko = $this->Toko_model->get_toko($order['id_toko']);
+                }
+
+                // Send email jika paid
+                if ($order['status'] === 'paid' && !empty($order['buyer_email'])) {
+                    $this->_send_receipt_email($order, $order_items, $toko);
+                }
+            }
+        }
+
+        $this->session->unset_userdata('last_order_id');
+
+        $data = array(
+            'title'       => 'Receipt Pesanan — ' . ($order_id ?: '-'),
+            'order'       => $order,
+            'order_items' => $order_items,
+            'toko'        => $toko,
+        );
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar',  $data);
+        $this->load->view('public/payment_result', $data);
+        $this->load->view('templates/footer',  $data);
+    }
+
+    /**
      * Notifikasi dari Midtrans (webhook)
      */
     public function notify() {
         $raw  = file_get_contents('php://input');
         $data = json_decode($raw, true);
-        if (!$data) { show_error('Invalid payload', 400); return; }
+        if (!$data) { http_response_code(400); echo 'Invalid'; return; }
 
-        $order_id       = isset($data['order_id']) ? $data['order_id'] : '';
-        $transaction_status = isset($data['transaction_status']) ? $data['transaction_status'] : '';
-        $fraud_status   = isset($data['fraud_status']) ? $data['fraud_status'] : '';
-        $server_key     = $this->mt['server_key'];
+        $order_id           = $data['order_id']           ?? '';
+        $transaction_status = $data['transaction_status'] ?? '';
+        $fraud_status       = $data['fraud_status']       ?? '';
+        $status_code        = $data['status_code']        ?? '';
+        $gross_amount       = $data['gross_amount']       ?? '';
+        $server_key         = $this->mt['server_key'];
 
         // Verifikasi signature Midtrans
-        $status_code    = isset($data['status_code']) ? $data['status_code'] : '';
-        $gross_amount   = isset($data['gross_amount']) ? $data['gross_amount'] : '';
-        $expected_sig   = hash('sha512', $order_id . $status_code . $gross_amount . $server_key);
-        $recv_sig       = isset($data['signature_key']) ? $data['signature_key'] : '';
-        if ($recv_sig !== $expected_sig) {
-            show_error('Invalid signature', 403); return;
-        }
+        $expected_sig = hash('sha512', $order_id . $status_code . $gross_amount . $server_key);
+        $recv_sig     = $data['signature_key'] ?? '';
+        if ($recv_sig !== $expected_sig) { http_response_code(403); echo 'Bad sig'; return; }
 
         // Mapping status
-        if ($transaction_status === 'capture') {
-            $new_status = ($fraud_status === 'accept') ? 'paid' : 'pending';
-        } elseif ($transaction_status === 'settlement') {
-            $new_status = 'paid';
-        } elseif (in_array($transaction_status, array('cancel', 'deny', 'expire'))) {
-            $new_status = 'failed';
+        if      ($transaction_status === 'capture')                                       { $new_status = ($fraud_status === 'accept') ? 'paid' : 'pending'; }
+        elseif  ($transaction_status === 'settlement')                                    { $new_status = 'paid'; }
+        elseif  (in_array($transaction_status, array('cancel','deny','expire')))          { $new_status = 'failed'; }
+        else                                                                              { $new_status = 'pending'; }
+
+        if (method_exists($this->Order_model, 'update_by_order_id')) {
+            $this->Order_model->update_by_order_id($order_id, array('status' => $new_status, 'gateway_payload' => $raw));
         } else {
-            $new_status = 'pending';
+            $this->db->where('order_id', $order_id)->update('orders', array('status' => $new_status));
         }
-
-        $this->Order_model->update_by_order_id($order_id, array('status' => $new_status, 'gateway_payload' => $raw));
         echo 'OK';
-    }
-
-    /**
-     * Halaman setelah pembayaran selesai (redirect dari Snap)
-     */
-    public function finish() {
-        $order_id = $this->input->get('order_id', TRUE) ?: $this->session->userdata('last_order_id');
-        $order    = $order_id ? $this->Order_model->find_by_order_id($order_id) : null;
-        $this->session->unset_userdata('last_order_id');
-
-        $status = $this->input->get('transaction_status', TRUE) ?: 'pending';
-        if ($order && in_array($status, array('settlement', 'capture'))) {
-            $this->Order_model->update_by_order_id($order_id, array('status' => 'paid'));
-            $order['status'] = 'paid';
-        }
-        $this->load->view('public/payment_result', array('order' => $order));
     }
 
     /**
@@ -198,13 +294,75 @@ class Payment extends CI_Controller {
         $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($err) {
-            return array(false, array('curl_error' => $err));
+        if ($err) return array(false, array('curl_error' => $err));
+        $parsed = json_decode($resp, true);
+        if ($http >= 200 && $http < 300 && isset($parsed['token'])) {
+            return array(true, $parsed);
         }
-        $data = json_decode($resp, true);
-        if ($http >= 200 && $http < 300 && isset($data['token'])) {
-            return array(true, $data);
+        return array(false, array('http' => $http, 'body' => $resp, 'parsed' => $parsed));
+    }
+
+    /**
+     * Kirim email receipt ke buyer (jika email tersedia)
+     */
+    private function _send_receipt_email($order, $items, $toko) {
+        try {
+            $buyer_email = $order['buyer_email'] ?? '';
+            if (!$buyer_email || $buyer_email === 'guest@example.com') return;
+
+            $total    = number_format($order['total'] ?? 0, 0, ',', '.');
+            $order_id = $order['order_id'] ?? '-';
+
+            $items_html = '';
+            foreach ($items as $item) {
+                $items_html .= '<tr>
+                  <td>' . htmlspecialchars($item['nama_produk'] ?? '-') . '</td>
+                  <td style="text-align:center">' . (int)($item['qty'] ?? 1) . '</td>
+                  <td style="text-align:right">Rp ' . number_format($item['price'] ?? 0, 0, ',', '.') . '</td>
+                </tr>';
+            }
+
+            $msg = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:auto">
+              <div style="background:#1a2a5e;color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+                <h2 style="margin:0">🎉 Terima Kasih Sudah Berbelanja!</h2>
+                <p style="margin:8px 0 0;opacity:.9">UMKM Banggai</p>
+              </div>
+              <div style="background:#fff;padding:28px;border:1px solid #eee;border-top:0">
+                <p>Halo <strong>' . htmlspecialchars($order['buyer_name']) . '</strong>,</p>
+                <p>Pembayaran Anda telah kami terima. Berikut detail pesanannya:</p>
+                <div style="background:#f8f5f2;border-radius:8px;padding:16px;margin:16px 0">
+                  <p style="margin:0 0 4px;font-size:13px;color:#666">Order ID</p>
+                  <p style="margin:0;font-family:monospace;font-weight:bold">' . htmlspecialchars($order_id) . '</p>
+                </div>
+                <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+                  <thead><tr style="background:#f0eae0">
+                    <th style="text-align:left;padding:8px;border:1px solid #ddd">Produk</th>
+                    <th style="text-align:center;padding:8px;border:1px solid #ddd">Qty</th>
+                    <th style="text-align:right;padding:8px;border:1px solid #ddd">Harga</th>
+                  </tr></thead>
+                  <tbody>' . $items_html . '</tbody>
+                  <tfoot><tr style="background:#f8f5f2;font-weight:bold">
+                    <td colspan="2" style="padding:8px;border:1px solid #ddd;text-align:right">Total</td>
+                    <td style="padding:8px;border:1px solid #ddd;text-align:right;color:#c8681a">Rp ' . $total . '</td>
+                  </tr></tfoot>
+                </table>
+                <div style="background:#e8f4fd;border-left:4px solid #1d6fa4;padding:12px;border-radius:4px;font-size:13px">
+                  📦 Seller akan segera menghubungi Anda via WhatsApp untuk koordinasi pengiriman.
+                </div>
+                <p style="margin-top:16px">Toko: <strong>' . htmlspecialchars($toko['nama_toko'] ?? '-') . '</strong></p>
+              </div>
+              <div style="background:#f4f4f4;padding:16px;text-align:center;font-size:12px;color:#888;border-radius:0 0 12px 12px">
+                UMKM Banggai &copy; ' . date('Y') . '
+              </div></body></html>';
+
+            $this->email->initialize(array('mailtype' => 'html', 'charset' => 'utf-8'));
+            $this->email->from('no-reply@banggaiumkm.gimmhost.my.id', 'UMKM Banggai');
+            $this->email->to($buyer_email);
+            $this->email->subject('Receipt Pesanan #' . $order_id . ' — UMKM Banggai');
+            $this->email->message($msg);
+            $this->email->send(false);
+        } catch (Exception $e) {
+            log_message('error', 'Payment email error: ' . $e->getMessage());
         }
-        return array(false, array('http' => $http, 'body' => $resp, 'parsed' => $data));
     }
 }
