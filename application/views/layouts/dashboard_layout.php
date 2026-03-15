@@ -684,9 +684,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link <?php echo ($controller == 'user' && $this->uri->segment(2) == 'profile') ? 'active' : ''; ?>" href="<?php echo site_url('user/profile'); ?>"><i class="fas fa-user me-2"></i>Profil</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link <?php echo ($this->uri->segment(2) == 'orders') ? 'active' : ''; ?>" href="<?php echo site_url('user/orders'); ?>"><i class="fas fa-history me-2"></i>Pesanan</a>
-                                </li>
+
                             <?php endif; ?>
                         </ul>
                         <ul class="navbar-nav ms-auto">
@@ -780,9 +778,7 @@
                         <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'profile') ? 'active' : ''; ?>" href="<?php echo site_url('user/profile'); ?>">
                             <i class="fas fa-user fa-fw"></i>Profil
                         </a>
-                        <a class="mobile-dash-link <?php echo ($this->uri->segment(2) == 'orders') ? 'active' : ''; ?>" href="<?php echo site_url('user/orders'); ?>">
-                            <i class="fas fa-history fa-fw"></i>Pesanan
-                        </a>
+
                     <?php endif; ?>
                 </nav>
                 

@@ -57,16 +57,16 @@
         </a>
     </div>
     
-    <!-- Card Jelajahi Katalog -->
+    <!-- Card Riwayat Pemesanan -->
     <div class="col-xl-3 col-sm-6">
-        <a href="<?php echo site_url('produk'); ?>" class="text-decoration-none">
+        <a href="<?php echo site_url('user/orders'); ?>" class="text-decoration-none">
             <div class="stats-card h-100">
                 <div class="stats-icon text-white" style="background: linear-gradient(135deg, var(--secondary) 0%, #729a5e 100%); box-shadow: 0 4px 15px rgba(133, 182, 111, 0.3);">
-                    <i class="fas fa-compass"></i>
+                    <i class="fas fa-history"></i>
                 </div>
                 <div class="stats-content">
-                    <div class="stats-value text-dark" style="font-size: 1.15rem; margin-top: 0.2rem;">Jelajahi</div>
-                    <div class="stats-label">Katalog Produk</div>
+                    <div class="stats-value text-dark"><?php echo $total_pesanan ?? '0'; ?></div>
+                    <div class="stats-label">Riwayat Pemesanan</div>
                 </div>
             </div>
         </a>

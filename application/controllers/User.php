@@ -25,6 +25,7 @@ class User extends CI_Controller {
         $data['title'] = 'Dashboard';
         $data['total_favorit'] = $this->db->where('id_user', $user_id)->count_all_results('produk_favorit');
         $data['total_ulasan'] = $this->db->where('id_user', $user_id)->count_all_results('produk_ulasan');
+        $data['total_pesanan'] = $this->db->where('id_user', $user_id)->count_all_results('orders');
         $data['page_content'] = 'user/dashboard_content'; 
         $this->load->view('layouts/dashboard_layout', $data);
     }
