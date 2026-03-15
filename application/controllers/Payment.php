@@ -182,29 +182,35 @@ class Payment extends CI_Controller {
             }
 
             if ($order) {
-                // Cek status real-time ke midtrans (jika pending)
-                if ($order['status'] === 'pending') {
-                    $midtrans_status = $this->_midtrans_check_status($order_id);
-                    if ($midtrans_status) {
-                        $ts = $midtrans_status['transaction_status'] ?? '';
-                        $fs = $midtrans_status['fraud_status'] ?? '';
-                        
-                        if ($ts === 'capture')      { $status_in = ($fs === 'accept') ? 'paid' : 'pending'; }
-                        elseif ($ts === 'settlement'){ $status_in = 'paid'; }
-                        elseif (in_array($ts, array('cancel','deny','expire'))) { $status_in = 'failed'; }
+                // Selalu cek status real-time ke Midtrans (bukan hanya saat pending)
+                // karena user diredirect ke sini segera setelah bayar, webhook belum tentu masuk
+                $midtrans_status = $this->_midtrans_check_status($order_id);
+                if ($midtrans_status) {
+                    $ts = $midtrans_status['transaction_status'] ?? '';
+                    $fs = $midtrans_status['fraud_status'] ?? '';
+
+                    if ($ts === 'settlement') {
+                        $status_in = 'paid';
+                    } elseif ($ts === 'capture') {
+                        $status_in = ($fs === 'accept') ? 'paid' : 'pending';
+                    } elseif (in_array($ts, array('cancel','deny','expire'))) {
+                        $status_in = 'failed';
+                    } else {
+                        $status_in = 'pending'; // pending/authorize/etc
                     }
+                } else {
+                    // API gagal dijangkau — gunakan status dari DB
+                    $status_in = $order['status'] ?: 'pending';
                 }
 
-                // Update status jika confirmed
-                if (in_array($status_in, array('settlement', 'capture', 'paid'))) {
-                    $new_status = 'paid';
-                    if (method_exists($this->Order_model, 'update_by_order_id')) {
-                        $this->Order_model->update_by_order_id($order_id, array('status' => 'paid'));
-                    } else {
-                        $this->db->where('order_id', $order_id)->update('orders', array('status' => 'paid'));
-                    }
-                    $order['status'] = 'paid';
+                // Update DB hanya jika ada perubahan status
+                if ($status_in === 'paid' && $order['status'] !== 'paid') {
+                    $this->Order_model->update_by_order_id($order_id, array('status' => 'paid'));
+                } elseif ($status_in === 'failed' && $order['status'] !== 'failed') {
+                    $this->Order_model->update_by_order_id($order_id, array('status' => 'failed'));
                 }
+                $order['status'] = $status_in;
+
 
                 // Ambil items
                 if (method_exists($this->Order_model, 'items_by_order_id')) {
