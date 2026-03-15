@@ -136,25 +136,53 @@ if (!empty($monthly_chart)) {
     <!-- Monthly Revenue Chart -->
     <div class="col-12 col-lg-8">
         <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem;">
-            <div class="card-header border-0 bg-white pt-4 px-4 pb-0" style="border-radius: 1rem 1rem 0 0;">
-                <div class="d-flex align-items-center justify-content-between">
+            <div class="card-header border-0 bg-white pt-4 px-4 pb-3" style="border-radius: 1rem 1rem 0 0;">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
                         <h6 class="fw-bold mb-0" style="color: var(--text-dark);">
-                            <i class="fas fa-chart-bar me-2" style="color: var(--primary);"></i>Pendapatan Bulanan
+                            <i class="fas fa-chart-bar me-2" style="color: var(--primary);"></i>Grafik Pendapatan
                         </h6>
-                        <small class="text-muted">Transaksi berhasil 6 bulan terakhir</small>
+                        <small class="text-muted" id="chartSubtitle">6 Bulan Terakhir</small>
+                    </div>
+                    <!-- Range Toggle Buttons -->
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="btn-group btn-group-sm" role="group" id="rangeButtons">
+                            <button type="button" class="btn range-btn" data-range="7d">7H</button>
+                            <button type="button" class="btn range-btn" data-range="30d">30H</button>
+                            <button type="button" class="btn range-btn active" data-range="6m">6B</button>
+                            <button type="button" class="btn range-btn" data-range="year">Thn Ini</button>
+                        </div>
+                        <!-- Custom Month Picker -->
+                        <div class="d-flex align-items-center gap-1">
+                            <input type="month" id="customMonthInput" class="form-control form-control-sm" style="width: 150px; font-size: 0.8rem;" max="<?php echo date('Y-m'); ?>">
+                            <button type="button" class="btn btn-sm range-btn" id="applyMonthBtn" title="Terapkan Bulan">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                        <!-- Custom Year Picker -->
+                        <div class="d-flex align-items-center gap-1">
+                            <select id="customYearInput" class="form-select form-select-sm" style="width: 100px; font-size: 0.8rem;">
+                                <?php for ($y = date('Y'); $y >= 2023; $y--): ?>
+                                    <option value="<?php echo $y; ?>" <?php echo ($y == date('Y')) ? 'selected' : ''; ?>><?php echo $y; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                            <button type="button" class="btn btn-sm range-btn" id="applyYearBtn" title="Terapkan Tahun">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="card-body p-4">
-                <?php if (empty($monthly_chart)): ?>
-                    <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
-                        <i class="fas fa-chart-bar fa-3x mb-3 opacity-25"></i>
-                        <p class="mb-0">Belum ada data transaksi berhasil</p>
-                    </div>
-                <?php else: ?>
-                    <canvas id="revenueChart" height="280"></canvas>
-                <?php endif; ?>
+                <div id="chartLoading" class="d-none d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                    <i class="fas fa-spinner fa-spin fa-2x mb-2 opacity-50"></i>
+                    <small>Memuat data...</small>
+                </div>
+                <div id="chartEmpty" class="d-none d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                    <i class="fas fa-chart-bar fa-3x mb-3 opacity-25"></i>
+                    <p class="mb-0">Tidak ada transaksi berhasil pada periode ini</p>
+                </div>
+                <canvas id="revenueChart" style="display: block;"></canvas>
             </div>
         </div>
     </div>
@@ -166,7 +194,7 @@ if (!empty($monthly_chart)) {
                 <h6 class="fw-bold mb-0" style="color: var(--text-dark);">
                     <i class="fas fa-trophy me-2" style="color: var(--accent);"></i>Top Toko
                 </h6>
-                <small class="text-muted">Berdasarkan total pendapatan</small>
+                <small class="text-muted">Berdasarkan total pendapatan (all time)</small>
             </div>
             <div class="card-body p-4">
                 <?php if (empty($top_toko)): ?>
@@ -287,104 +315,173 @@ if (!empty($monthly_chart)) {
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-<?php if (!empty($monthly_chart)): ?>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('revenueChart').getContext('2d');
 
-    const labels = <?php echo json_encode($chart_labels); ?>;
-    const pendapatan = <?php echo json_encode($chart_pendapatan); ?>;
-    const orders = <?php echo json_encode($chart_orders); ?>;
+    const CHART_API = '<?php echo site_url("admin/chart_data"); ?>';
+    let revenueChart = null;
 
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Pendapatan (Rp)',
-                    data: pendapatan,
-                    backgroundColor: 'rgba(226, 125, 96, 0.8)',
-                    borderColor: '#E27D60',
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderSkipped: false,
-                    yAxisID: 'y',
-                },
-                {
-                    label: 'Jumlah Order',
-                    data: orders,
-                    type: 'line',
-                    borderColor: '#85B66F',
-                    backgroundColor: 'rgba(133, 182, 111, 0.15)',
-                    borderWidth: 2.5,
-                    pointBackgroundColor: '#85B66F',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    tension: 0.4,
-                    fill: true,
-                    yAxisID: 'y1',
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        font: { family: 'Inter', size: 12 }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            if (context.dataset.yAxisID === 'y') {
-                                return ' Rp ' + context.parsed.y.toLocaleString('id-ID');
-                            }
-                            return ' ' + context.parsed.y + ' Order';
-                        }
-                    }
-                }
+    // --- Chart options config ---
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                display: true, position: 'top',
+                labels: { usePointStyle: true, pointStyle: 'circle', font: { family: 'Inter', size: 12 } }
             },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { family: 'Inter', size: 12 } }
-                },
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    grid: { color: 'rgba(0,0,0,0.05)' },
-                    ticks: {
-                        font: { family: 'Inter', size: 11 },
-                        callback: function(value) {
-                            if (value >= 1000000) return 'Rp ' + (value/1000000).toFixed(1) + 'jt';
-                            if (value >= 1000) return 'Rp ' + (value/1000).toFixed(0) + 'rb';
-                            return 'Rp ' + value;
-                        }
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                        font: { family: 'Inter', size: 11 },
-                        stepSize: 1
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        if (context.dataset.yAxisID === 'y') return ' Rp ' + context.parsed.y.toLocaleString('id-ID');
+                        return ' ' + context.parsed.y + ' Order';
                     }
                 }
             }
+        },
+        scales: {
+            x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+            y: {
+                type: 'linear', display: true, position: 'left',
+                grid: { color: 'rgba(0,0,0,0.05)' },
+                ticks: {
+                    font: { family: 'Inter', size: 11 },
+                    callback: function(v) {
+                        if (v >= 1000000) return 'Rp ' + (v/1000000).toFixed(1) + 'jt';
+                        if (v >= 1000) return 'Rp ' + (v/1000).toFixed(0) + 'rb';
+                        return 'Rp ' + v;
+                    }
+                }
+            },
+            y1: {
+                type: 'linear', display: true, position: 'right',
+                grid: { drawOnChartArea: false },
+                ticks: { font: { family: 'Inter', size: 11 }, stepSize: 1 }
+            }
         }
+    };
+
+    // --- Build or update the chart ---
+    function renderChart(rows) {
+        const canvas  = document.getElementById('revenueChart');
+        const empty   = document.getElementById('chartEmpty');
+        const loading = document.getElementById('chartLoading');
+
+        loading.classList.add('d-none');
+
+        if (!rows || rows.length === 0) {
+            canvas.style.display = 'none';
+            empty.classList.remove('d-none');
+            return;
+        }
+
+        empty.classList.add('d-none');
+        canvas.style.display = 'block';
+
+        const labels  = rows.map(r => r.label);
+        const revenue = rows.map(r => parseInt(r.pendapatan));
+        const orders  = rows.map(r => parseInt(r.jumlah_order));
+
+        const datasets = [
+            {
+                label: 'Pendapatan (Rp)',
+                data: revenue,
+                backgroundColor: 'rgba(226, 125, 96, 0.8)',
+                borderColor: '#E27D60',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+                yAxisID: 'y',
+            },
+            {
+                label: 'Jumlah Order',
+                data: orders,
+                type: 'line',
+                borderColor: '#85B66F',
+                backgroundColor: 'rgba(133, 182, 111, 0.15)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#85B66F',
+                pointRadius: 5, pointHoverRadius: 7,
+                tension: 0.4, fill: true,
+                yAxisID: 'y1',
+            }
+        ];
+
+        if (revenueChart) {
+            revenueChart.data.labels   = labels;
+            revenueChart.data.datasets[0].data = revenue;
+            revenueChart.data.datasets[1].data = orders;
+            revenueChart.update('active');
+        } else {
+            canvas.height = 280;
+            revenueChart = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: { labels, datasets },
+                options: chartOptions
+            });
+        }
+    }
+
+    // --- Load data via AJAX ---
+    function loadChart(params, subtitle) {
+        const canvas  = document.getElementById('revenueChart');
+        const loading = document.getElementById('chartLoading');
+        const empty   = document.getElementById('chartEmpty');
+
+        canvas.style.display = 'none';
+        empty.classList.add('d-none');
+        loading.classList.remove('d-none');
+        document.getElementById('chartSubtitle').textContent = subtitle;
+
+        const url = CHART_API + '?' + new URLSearchParams(params).toString();
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.json())
+            .then(data => renderChart(data))
+            .catch(() => {
+                loading.classList.add('d-none');
+                empty.classList.remove('d-none');
+            });
+    }
+
+    // --- Range toggle buttons ---
+    const subtitles = {
+        '7d'  : '7 Hari Terakhir',
+        '30d' : '30 Hari Terakhir',
+        '6m'  : '6 Bulan Terakhir',
+        'year': 'Tahun ' + new Date().getFullYear(),
+    };
+
+    document.querySelectorAll('.range-btn[data-range]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadChart({ range: this.dataset.range }, subtitles[this.dataset.range]);
+        });
     });
+
+    // --- Custom Month ---
+    document.getElementById('applyMonthBtn').addEventListener('click', function() {
+        const val = document.getElementById('customMonthInput').value;
+        if (!val) return;
+        document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const [y, m] = val.split('-');
+        const label  = new Date(y, m-1).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+        loadChart({ range: 'custom_month', month: val }, label);
+    });
+
+    // --- Custom Year ---
+    document.getElementById('applyYearBtn').addEventListener('click', function() {
+        const yr = document.getElementById('customYearInput').value;
+        document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        loadChart({ range: 'custom_year', year: yr }, 'Tahun ' + yr);
+    });
+
+    // --- Initial load (6m default) ---
+    loadChart({ range: '6m' }, '6 Bulan Terakhir');
 });
-<?php endif; ?>
 </script>
 
 <style>
@@ -392,4 +489,24 @@ document.addEventListener('DOMContentLoaded', function() {
     transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(62, 39, 35, 0.1) !important;
 }
+.range-btn {
+    background: transparent;
+    border: 1.5px solid #e0d6d0;
+    color: var(--text-dark);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.75rem;
+    border-radius: 50px !important;
+    transition: all 0.2s ease;
+}
+.range-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.range-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
 </style>
+

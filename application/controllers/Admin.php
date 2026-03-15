@@ -76,11 +76,118 @@ class Admin extends CI_Controller {
         $this->load->view('layouts/dashboard_layout', $data);
     }
 
+    /**
+     * AJAX endpoint: returns chart JSON for a given date range
+     * GET /admin/chart_data?range=7d|30d|6m|custom_month|year|custom_year
+     *     &month=YYYY-MM  (for custom_month)
+     *     &year=YYYY      (for year / custom_year)
+     */
+    public function chart_data()
+    {
+        // Must be AJAX
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $range = $this->input->get('range') ?? '6m';
+
+        switch ($range) {
+            case '7d':
+                $sql = "
+                    SELECT DATE(created_at) as bulan,
+                           DATE_FORMAT(created_at, '%d %b') as label,
+                           SUM(total) as pendapatan,
+                           COUNT(*) as jumlah_order
+                    FROM orders
+                    WHERE status = 'paid'
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                    GROUP BY DATE(created_at)
+                    ORDER BY bulan ASC";
+                break;
+
+            case '30d':
+                $sql = "
+                    SELECT DATE(created_at) as bulan,
+                           DATE_FORMAT(created_at, '%d %b') as label,
+                           SUM(total) as pendapatan,
+                           COUNT(*) as jumlah_order
+                    FROM orders
+                    WHERE status = 'paid'
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                    GROUP BY DATE(created_at)
+                    ORDER BY bulan ASC";
+                break;
+
+            case 'custom_month':
+                // e.g. ?range=custom_month&month=2026-03
+                $m = $this->input->get('month') ?? date('Y-m');
+                $year_m = $this->db->escape_str($m);
+                $sql = "
+                    SELECT DATE(created_at) as bulan,
+                           DATE_FORMAT(created_at, '%d %b') as label,
+                           SUM(total) as pendapatan,
+                           COUNT(*) as jumlah_order
+                    FROM orders
+                    WHERE status = 'paid'
+                      AND DATE_FORMAT(created_at, '%Y-%m') = '$year_m'
+                    GROUP BY DATE(created_at)
+                    ORDER BY bulan ASC";
+                break;
+
+            case 'year':
+                $sql = "
+                    SELECT DATE_FORMAT(created_at, '%Y-%m') as bulan,
+                           DATE_FORMAT(created_at, '%b %Y') as label,
+                           SUM(total) as pendapatan,
+                           COUNT(*) as jumlah_order
+                    FROM orders
+                    WHERE status = 'paid'
+                      AND YEAR(created_at) = YEAR(NOW())
+                    GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                    ORDER BY bulan ASC";
+                break;
+
+            case 'custom_year':
+                // e.g. ?range=custom_year&year=2025
+                $y = (int)($this->input->get('year') ?? date('Y'));
+                $sql = "
+                    SELECT DATE_FORMAT(created_at, '%Y-%m') as bulan,
+                           DATE_FORMAT(created_at, '%b %Y') as label,
+                           SUM(total) as pendapatan,
+                           COUNT(*) as jumlah_order
+                    FROM orders
+                    WHERE status = 'paid'
+                      AND YEAR(created_at) = $y
+                    GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                    ORDER BY bulan ASC";
+                break;
+
+            default: // 6m
+                $sql = "
+                    SELECT DATE_FORMAT(created_at, '%Y-%m') as bulan,
+                           DATE_FORMAT(created_at, '%b %Y') as label,
+                           SUM(total) as pendapatan,
+                           COUNT(*) as jumlah_order
+                    FROM orders
+                    WHERE status = 'paid'
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+                    GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                    ORDER BY bulan ASC";
+        }
+
+        $rows = $this->db->query($sql)->result_array();
+
+        header('Content-Type: application/json');
+        echo json_encode($rows);
+        exit;
+    }
+
     public function profile()
     {
         $user_id = $this->session->userdata('id');
         $data['title'] = 'Edit Profil Admin';
         $data['user'] = $this->User_model->get_user_by_id($user_id);
+
 
         // Aturan validasi dasar
         $this->form_validation->set_rules('nama', 'Nama Lengkap', 'required|trim');
