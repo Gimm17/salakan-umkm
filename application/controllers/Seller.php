@@ -44,9 +44,194 @@ class Seller extends CI_Controller {
                 ->count_all_results('produk_ulasan');
         }
         $data['pending_count'] = $pending_count;
+
+        // --- Sales Analytics untuk Toko ---
+        // 1. Total Pendapatan Toko
+        $data['total_revenue'] = $this->db->select_sum('total')
+            ->where('id_toko', $toko_id)
+            ->where('status', 'paid')
+            ->get('orders')->row()->total ?? 0;
+
+        // 2. Total Pesanan (Paid) Toko
+        $data['total_orders'] = $this->db->where('id_toko', $toko_id)
+            ->where('status', 'paid')
+            ->count_all_results('orders');
+
+        // 3. Data Chart Bulanan (6 Bulan Terakhir)
+        $six_months_ago = date('Y-m-d H:i:s', strtotime('-5 months', strtotime(date('Y-m-01'))));
+        $chart_query = $this->db->select('DATE_FORMAT(created_at, "%b %Y") as month_year, DATE_FORMAT(created_at, "%Y-%m") as sort_date, SUM(total) as total_pendapatan, COUNT(id) as jumlah_order')
+            ->where('id_toko', $toko_id)
+            ->where('status', 'paid')
+            ->where('created_at >=', $six_months_ago)
+            ->group_by('sort_date, month_year')
+            ->order_by('sort_date', 'ASC')
+            ->get('orders')->result_array();
+
+        // Siapkan array kosong 6 bulan terakhir supaya chart tetap terisi 0 jika tidak ada penjualan
+        $months = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $months[date('Y-m', strtotime("-$i months"))] = [
+                'label' => date('M Y', strtotime("-$i months")),
+                'pendapatan' => 0,
+                'orders' => 0
+            ];
+        }
+
+        foreach ($chart_query as $row) {
+            if (isset($months[$row['sort_date']])) {
+                $months[$row['sort_date']]['pendapatan'] = (int)$row['total_pendapatan'];
+                $months[$row['sort_date']]['orders'] = (int)$row['jumlah_order'];
+            }
+        }
+
+        $data['monthly_chart']  = array_values($months);
+        $data['chart_labels']   = array_column($data['monthly_chart'], 'label');
+        $data['chart_pendapatan'] = array_column($data['monthly_chart'], 'pendapatan');
+        $data['chart_orders']   = array_column($data['monthly_chart'], 'orders');
+
+        // 4. 5 Transaksi Terbaru Toko Ini
+        $data['recent_orders'] = $this->db->select('order_id, buyer_name, total, status, created_at')
+            ->where('id_toko', $toko_id)
+            ->order_by('created_at', 'DESC')
+            ->limit(5)
+            ->get('orders')->result_array();
         
         $data['page_content'] = 'seller/dashboard_content'; 
         $this->load->view('layouts/dashboard_layout', $data);
+    }
+
+    /**
+     * AJAX endpoint untuk data chart penjual
+     */
+    public function chart_data()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $toko_id = $this->toko_id;
+        $range = $this->input->get('range'); // 7d, 30d, 6m, custom_month, year, custom_year
+        $custom_month = $this->input->get('month'); // format YYYY-MM
+        $custom_year = $this->input->get('year'); // format YYYY
+
+        $data = ['labels' => [], 'pendapatan' => [], 'orders' => [], 'label_title' => ''];
+
+        if ($range === '7d' || $range === '30d') {
+            $days = ($range === '7d') ? 6 : 29;
+            $start_date = date('Y-m-d', strtotime("-$days days"));
+            
+            $query = $this->db->select('DATE(created_at) as date_val, SUM(total) as total_pendapatan, COUNT(id) as jumlah_order')
+                ->where('id_toko', $toko_id)
+                ->where('status', 'paid')
+                ->where('DATE(created_at) >=', $start_date)
+                ->group_by('date_val')
+                ->order_by('date_val', 'ASC')
+                ->get('orders')->result_array();
+
+            $dates = [];
+            for ($i = $days; $i >= 0; $i--) {
+                $d = date('Y-m-d', strtotime("-$i days"));
+                $dates[$d] = ['label' => date('d M', strtotime($d)), 'pendapatan' => 0, 'orders' => 0];
+            }
+            foreach ($query as $row) {
+                if (isset($dates[$row['date_val']])) {
+                    $dates[$row['date_val']]['pendapatan'] = (int)$row['total_pendapatan'];
+                    $dates[$row['date_val']]['orders'] = (int)$row['jumlah_order'];
+                }
+            }
+            foreach ($dates as $day_data) {
+                $data['labels'][] = $day_data['label'];
+                $data['pendapatan'][] = $day_data['pendapatan'];
+                $data['orders'][] = $day_data['orders'];
+            }
+            $data['label_title'] = ($range === '7d') ? '7 Hari Terakhir' : '30 Hari Terakhir';
+
+        } elseif ($range === 'custom_month' && $custom_month) {
+            $start_date = $custom_month . '-01';
+            $end_date = date('Y-m-t', strtotime($start_date));
+            $days_in_month = (int)date('t', strtotime($start_date));
+
+            $query = $this->db->select('DATE(created_at) as date_val, SUM(total) as total_pendapatan, COUNT(id) as jumlah_order')
+                ->where('id_toko', $toko_id)
+                ->where('status', 'paid')
+                ->where('DATE(created_at) >=', $start_date)
+                ->where('DATE(created_at) <=', $end_date)
+                ->group_by('date_val')
+                ->order_by('date_val', 'ASC')
+                ->get('orders')->result_array();
+
+            $dates = [];
+            for ($i = 1; $i <= $days_in_month; $i++) {
+                $d = $custom_month . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                $dates[$d] = ['label' => str_pad($i, 2, '0', STR_PAD_LEFT) . ' ' . date('M', strtotime($start_date)), 'pendapatan' => 0, 'orders' => 0];
+            }
+            foreach ($query as $row) {
+                if (isset($dates[$row['date_val']])) {
+                    $dates[$row['date_val']]['pendapatan'] = (int)$row['total_pendapatan'];
+                    $dates[$row['date_val']]['orders'] = (int)$row['jumlah_order'];
+                }
+            }
+            foreach ($dates as $day_data) {
+                $data['labels'][] = $day_data['label'];
+                $data['pendapatan'][] = $day_data['pendapatan'];
+                $data['orders'][] = $day_data['orders'];
+            }
+            // Parse bulan indo
+            $bulan_indo = ['01'=>'Januari','02'=>'Februari','03'=>'Maret','04'=>'April','05'=>'Mei','06'=>'Juni','07'=>'Juli','08'=>'Agustus','09'=>'September','10'=>'Oktober','11'=>'November','12'=>'Desember'];
+            $exp = explode('-', $custom_month);
+            $data['label_title'] = 'Bulan ' . $bulan_indo[$exp[1]] . ' ' . $exp[0];
+
+        } else { // 6m, year, custom_year
+            if ($range === '6m') {
+                $start_month = date('Y-m-01', strtotime('-5 months'));
+                $end_month = date('Y-m-t');
+                $num_months = 6;
+                $data['label_title'] = '6 Bulan Terakhir';
+            } else { // year or custom_year
+                $target_year = ($range === 'custom_year' && $custom_year) ? $custom_year : date('Y');
+                $start_month = $target_year . '-01-01';
+                $end_month = $target_year . '-12-31';
+                $num_months = 12;
+                $data['label_title'] = 'Tahun ' . $target_year;
+            }
+
+            $query = $this->db->select('DATE_FORMAT(created_at, "%b %Y") as month_year, DATE_FORMAT(created_at, "%Y-%m") as sort_date, SUM(total) as total_pendapatan, COUNT(id) as jumlah_order')
+                ->where('id_toko', $toko_id)
+                ->where('status', 'paid')
+                ->where('DATE(created_at) >=', $start_month)
+                ->where('DATE(created_at) <=', $end_month)
+                ->group_by('sort_date, month_year')
+                ->order_by('sort_date', 'ASC')
+                ->get('orders')->result_array();
+
+            $months = [];
+            if ($range === '6m') {
+                for ($i = 5; $i >= 0; $i--) {
+                    $m = date('Y-m', strtotime("-$i months"));
+                    $months[$m] = ['label' => date('M Y', strtotime("-$i months")), 'pendapatan' => 0, 'orders' => 0];
+                }
+            } else {
+                for ($i = 1; $i <= 12; $i++) {
+                    $m = $target_year . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                    $months[$m] = ['label' => date('M', mktime(0, 0, 0, $i, 10)) . ' ' . $target_year, 'pendapatan' => 0, 'orders' => 0];
+                }
+            }
+
+            foreach ($query as $row) {
+                if (isset($months[$row['sort_date']])) {
+                    $months[$row['sort_date']]['pendapatan'] = (int)$row['total_pendapatan'];
+                    $months[$row['sort_date']]['orders'] = (int)$row['jumlah_order'];
+                }
+            }
+            foreach ($months as $month_data) {
+                $data['labels'][] = $month_data['label'];
+                $data['pendapatan'][] = $month_data['pendapatan'];
+                $data['orders'][] = $month_data['orders'];
+            }
+        }
+
+        echo json_encode($data);
     }
     
     /**
