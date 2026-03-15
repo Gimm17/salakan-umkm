@@ -20,10 +20,12 @@ class Ipaymu extends CI_Controller {
         $key = $this->ipay['api_key'];
         $host = !empty($this->ipay['is_sandbox']) ? 'https://sandbox.ipaymu.com' : 'https://my.ipaymu.com';
         $url = $host . $endpoint;
-        $ts  = gmdate('Y-m-d H:i:s');
+        // Timestamp sesuai format resmi iPaymu: YmdHis
+        $ts  = date('YmdHis');
 
-        $body = json_encode($payload);
-        $bodyHash = strtolower(hash('sha256', $body)); // iPaymu v2: body harus di-SHA256 dulu
+        // JSON_UNESCAPED_SLASHES WAJIB agar SHA256 hash body cocok dengan yang dikirim
+        $body = json_encode($payload, JSON_UNESCAPED_SLASHES);
+        $bodyHash = strtolower(hash('sha256', $body)); // SHA256 body dulu
         $stringToSign = 'POST:' . $va . ':' . $bodyHash . ':' . $key;
         $signature = hash_hmac('sha256', $stringToSign, $key);
 
@@ -31,14 +33,17 @@ class Ipaymu extends CI_Controller {
         curl_setopt_array($ch, array(
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => array(
+                'Accept: application/json',
                 'Content-Type: application/json',
                 'va: ' . $va,
                 'signature: ' . $signature,
                 'timestamp: ' . $ts
             ),
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $body,
-            CURLOPT_TIMEOUT => 30
+            CURLOPT_POST        => true,
+            CURLOPT_POSTFIELDS  => $body,
+            CURLOPT_TIMEOUT     => 30,
+            CURLOPT_SSL_VERIFYPEER => false,  // Sesuai sample resmi
+            CURLOPT_SSL_VERIFYHOST => false
         ));
         $resp = curl_exec($ch);
         if ($resp === false) {
