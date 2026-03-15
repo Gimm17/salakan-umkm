@@ -407,7 +407,7 @@
                                         <?php if(isset($kuota_ulasan) && $kuota_ulasan['sisa_kuota'] > 0): ?>
                                         <div class="card mb-4">
                                             <div class="card-body">
-                                                <h6 class="fw-bold mb-3">Berikan Ulasan Anda (Sisa Kuota: <?php echo $kuota_ulasan['sisa_kuota']; ?>)</h6>
+                                                <h6 class="fw-bold mb-3">Berikan Ulasan Anda</h6>
                                                 <form id="reviewForm">
                                                     <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" id="csrf-token-review">
                                                     <input type="hidden" name="id_produk" value="<?php echo $produk['id']; ?>">
@@ -425,7 +425,7 @@
                                                     <div class="mb-3">
                                                         <label for="komentar" class="form-label fw-semibold">Komentar</label>
                                                         <textarea class="form-control" id="komentar" name="komentar" rows="4" 
-                                                                placeholder="Ceritakan pengalaman Anda dengan produk ini..." required></textarea>
+                                                                placeholder="Ceritakan pengalaman Anda dengan produk ini (opsional)..."></textarea>
                                                     </div>
                                                     
                                                     <button type="submit" class="btn btn-primary rounded-pill px-4">
@@ -438,12 +438,6 @@
                                         <div class="alert alert-warning mb-4">
                                             <i class="fas fa-shopping-bag me-2"></i>
                                             Anda harus membeli produk ini terlebih dahulu sebelum dapat memberikan ulasan.
-                                        </div>
-                                        <?php else: ?>
-                                        <div class="alert alert-info mb-4">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            Anda sudah menggunakan semua kesempatan ulasan untuk riwayat pembelian produk ini.
-                                            <a href="<?php echo site_url('user/ulasan_saya'); ?>" class="alert-link">Lihat ulasan Anda</a>
                                         </div>
                                         <?php endif; ?>
                                     <?php elseif(!$this->session->userdata('is_logged_in')): ?>
@@ -692,10 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            if (komentar.length < 10) {
-                Swal.fire('Peringatan', 'Komentar minimal 10 karakter.', 'warning');
-                return;
-            }
+
             
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
