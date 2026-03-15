@@ -464,7 +464,7 @@ class User extends CI_Controller {
         $user_id = $this->session->userdata('id');
         $filter  = $this->input->get('status', TRUE) ?: 'all';
 
-        $this->db->select('o.*, t.nama_toko, t.no_wa as toko_wa');
+        $this->db->select('o.*, t.nama_toko');
         $this->db->from('orders o');
         $this->db->join('toko t', 'o.id_toko = t.id', 'left');
         $this->db->where('o.id_user', $user_id);
