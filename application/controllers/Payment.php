@@ -68,6 +68,7 @@ class Payment extends CI_Controller {
         $buyer_address= trim($this->input->post('buyer_address', TRUE));
         $buyer_city   = trim($this->input->post('buyer_city',    TRUE));
         $buyer_note   = trim($this->input->post('buyer_note',    TRUE));
+        $repay_order_id = trim($this->input->post('repay_order_id', TRUE));
 
         if (!$buyer_name || !$buyer_wa) {
             $this->output->set_status_header(400)->set_output(json_encode(array('error' => 'Nama dan WhatsApp wajib diisi')));
@@ -80,41 +81,63 @@ class Payment extends CI_Controller {
             return;
         }
 
-        $toko      = $this->Toko_model->get_toko_by_id($produk['id_toko']);
-        $order_id  = 'ORDER-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
-        $buyer_id  = (int) ($this->session->userdata('id') ?: 0);
-        $gross     = (int) $produk['harga'] * $qty;
+        $toko        = $this->Toko_model->get_toko_by_id($produk['id_toko']);
+        $buyer_id    = (int) ($this->session->userdata('id') ?: 0);
         $buyer_email = $this->session->userdata('email') ?: 'guest@example.com';
 
-        // Simpan order ke DB lokal
-        $order_data = array(
-            'order_id'      => $order_id,
-            'id_toko'       => $produk['id_toko'],
-            'id_user'       => $buyer_id,
-            'total'         => $gross,
-            'status'        => 'pending',
-            'buyer_name'    => $buyer_name,
-            'buyer_email'   => $buyer_email,
-            'buyer_wa'      => $buyer_wa,
-            'buyer_address' => $buyer_address,
-            'buyer_city'    => $buyer_city,
-            'buyer_note'    => $buyer_note,
-        );
-        $item_data = array(
-            'produk_id'   => $produk['id'],
-            'nama_produk' => $produk['nama_produk'],
-            'price'       => (int) $produk['harga'],
-            'qty'         => $qty,
-        );
-
-        if (method_exists($this->Order_model, 'create_order_with_item')) {
-            $this->Order_model->create_order_with_item($order_data, $item_data);
+        // ---- REPAY: gunakan order lama, jangan buat baru ----
+        if ($repay_order_id) {
+            $existing = $this->db->where('order_id', $repay_order_id)
+                                 ->where('status', 'pending')
+                                 ->get('orders')->row_array();
+            if (!$existing) {
+                $this->output->set_status_header(400)->set_output(json_encode(array('error' => 'Order tidak ditemukan atau sudah tidak pending')));
+                return;
+            }
+            // Update info pembeli
+            $this->db->where('order_id', $repay_order_id)->update('orders', array(
+                'buyer_name'    => $buyer_name,
+                'buyer_wa'      => $buyer_wa,
+                'buyer_address' => $buyer_address,
+                'buyer_city'    => $buyer_city,
+                'buyer_note'    => $buyer_note,
+            ));
+            $order_id = $repay_order_id;
+            $gross    = (int) $existing['total'];
         } else {
-            $this->db->insert('orders', $order_data);
-            $inserted_id = $this->db->insert_id();
-            if ($inserted_id) {
-                $item_data['order_id'] = $order_id;
-                $this->db->insert('order_items', $item_data);
+            // ---- ORDER BARU ----
+            $order_id  = 'ORDER-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
+            $gross     = (int) $produk['harga'] * $qty;
+
+            $order_data = array(
+                'order_id'      => $order_id,
+                'id_toko'       => $produk['id_toko'],
+                'id_user'       => $buyer_id,
+                'total'         => $gross,
+                'status'        => 'pending',
+                'buyer_name'    => $buyer_name,
+                'buyer_email'   => $buyer_email,
+                'buyer_wa'      => $buyer_wa,
+                'buyer_address' => $buyer_address,
+                'buyer_city'    => $buyer_city,
+                'buyer_note'    => $buyer_note,
+            );
+            $item_data = array(
+                'produk_id'   => $produk['id'],
+                'nama_produk' => $produk['nama_produk'],
+                'price'       => (int) $produk['harga'],
+                'qty'         => $qty,
+            );
+
+            if (method_exists($this->Order_model, 'create_order_with_item')) {
+                $this->Order_model->create_order_with_item($order_data, $item_data);
+            } else {
+                $this->db->insert('orders', $order_data);
+                $inserted_id = $this->db->insert_id();
+                if ($inserted_id) {
+                    $item_data['order_id'] = $order_id;
+                    $this->db->insert('order_items', $item_data);
+                }
             }
         }
 
@@ -141,6 +164,11 @@ class Payment extends CI_Controller {
                     'quantity' => $qty,
                     'name'     => substr($produk['nama_produk'], 0, 50),
                 ),
+            ),
+            'expiry' => array(
+                'start_time' => date('Y-m-d H:i:s O'),
+                'unit'       => 'minute',
+                'duration'   => 10,
             ),
             'callbacks' => array(
                 'finish' => site_url('payment/success?order_id=' . $order_id),

@@ -101,6 +101,7 @@ $csrf_hash    = $this->security->get_csrf_hash();
   <form id="checkout-form" novalidate>
     <input type="hidden" id="csrf-token-input" name="<?php echo $csrf_name; ?>" value="<?php echo $csrf_hash; ?>">
     <input type="hidden" name="produk_id" value="<?php echo (int)$produk['id']; ?>">
+    <input type="hidden" name="repay_order_id" value="<?php echo htmlspecialchars($this->input->get('repay', TRUE) ?? ''); ?>">
 
     <div class="row g-4">
       <!-- LEFT: Form Detail -->
