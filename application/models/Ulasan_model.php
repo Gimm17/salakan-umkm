@@ -36,7 +36,7 @@ class Ulasan_model extends CI_Model {
     {
         $this->db->select_sum('oi.qty', 'total_qty');
         $this->db->from('orders o');
-        $this->db->join('order_items oi', 'o.order_db_id = oi.order_db_id');
+        $this->db->join('order_items oi', 'o.order_id = oi.order_id');
         $this->db->where('o.id_user', $id_user);
         $this->db->where('oi.id_produk', $id_produk);
         $this->db->where_in('o.status', ['paid', 'settlement', 'capture']);
