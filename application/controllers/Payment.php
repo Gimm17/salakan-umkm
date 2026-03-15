@@ -46,10 +46,8 @@ class Payment extends CI_Controller {
             'produk' => $produk,
             'toko'   => $toko,
         );
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/navbar',  $data);
-        $this->load->view('public/checkout',   $data);
-        $this->load->view('templates/footer',  $data);
+        $data['page_content'] = 'public/checkout';
+        $this->load->view('layouts/public_layout', $data);
     }
 
     /**
@@ -222,10 +220,8 @@ class Payment extends CI_Controller {
             'order_items' => $order_items,
             'toko'        => $toko,
         );
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/navbar',  $data);
-        $this->load->view('public/payment_result', $data);
-        $this->load->view('templates/footer',  $data);
+        $data['page_content'] = 'public/payment_result';
+        $this->load->view('layouts/public_layout', $data);
     }
 
     /**
