@@ -5,7 +5,16 @@ class MigrateDummy extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->database();
+        $config = array(
+            'hostname' => 'localhost',
+            'username' => 'gimmhost_banggaiumkm',
+            'password' => 'CHANGE_ME_DB_PASSWORD',
+            'database' => 'gimmhost_banggaiumkm',
+            'dbdriver' => 'mysqli',
+            'pconnect' => FALSE,
+            'db_debug' => TRUE
+        );
+        $this->load->database($config);
     }
 
     public function index() {
