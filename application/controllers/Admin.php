@@ -21,6 +21,54 @@ class Admin extends CI_Controller {
         $data['total_toko'] = $this->db->count_all('toko');
         $data['toko_menunggu'] = $this->db->where('status_persetujuan', 'menunggu')->count_all_results('toko');
         
+        // ===== SALES ANALYTICS =====
+        // Total semua transaksi sukses (status = 'paid')
+        $total_rev = $this->db->select_sum('total')
+            ->where('status', 'paid')
+            ->get('orders')->row();
+        $data['total_revenue'] = $total_rev->total ?? 0;
+
+        // Total jumlah order paid
+        $data['total_orders_paid'] = $this->db->where('status', 'paid')->count_all_results('orders');
+
+        // Chart: pendapatan per bulan (6 bulan terakhir)
+        $monthly_query = $this->db->query("
+            SELECT 
+                DATE_FORMAT(created_at, '%Y-%m') as bulan,
+                DATE_FORMAT(created_at, '%b %Y') as label,
+                SUM(total) as pendapatan,
+                COUNT(*) as jumlah_order
+            FROM orders
+            WHERE status = 'paid'
+              AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+            ORDER BY bulan ASC
+        ");
+        $data['monthly_chart'] = $monthly_query->result_array();
+
+        // Top 5 Toko berdasarkan total pendapatan
+        $top_toko_query = $this->db->query("
+            SELECT t.nama_toko, SUM(o.total) as total_pendapatan, COUNT(o.id) as jumlah_transaksi
+            FROM orders o
+            JOIN toko t ON o.id_toko = t.id
+            WHERE o.status = 'paid'
+            GROUP BY o.id_toko
+            ORDER BY total_pendapatan DESC
+            LIMIT 5
+        ");
+        $data['top_toko'] = $top_toko_query->result_array();
+
+        // Transaksi terbaru (5 terakhir)
+        $recent_orders_query = $this->db->query("
+            SELECT o.order_id, o.buyer_name, o.total, o.status, o.created_at, t.nama_toko
+            FROM orders o
+            LEFT JOIN toko t ON o.id_toko = t.id
+            ORDER BY o.created_at DESC
+            LIMIT 5
+        ");
+        $data['recent_orders'] = $recent_orders_query->result_array();
+        // ===========================
+
         // Menentukan file konten yang akan dimuat
         $data['page_content'] = 'admin/dashboard_content'; 
 
