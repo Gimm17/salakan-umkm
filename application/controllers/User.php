@@ -169,10 +169,14 @@ class User extends CI_Controller {
                 $response = ['status' => 'error', 'message' => 'Komentar wajib diisi.'];
             } elseif (strlen($komentar) < 10) {
                 $response = ['status' => 'error', 'message' => 'Komentar minimal 10 karakter.'];
-            } elseif ($this->Ulasan_model->sudah_mengulas($id_user, $id_produk)) {
-                $response = ['status' => 'error', 'message' => 'Anda sudah memberikan ulasan untuk produk ini.'];
             } else {
-                $data_ulasan = [
+                $kuota_ulasan = $this->Ulasan_model->sisa_kuota_ulasan($id_user, $id_produk);
+                if ($kuota_ulasan['total_purchased'] == 0) {
+                    $response = ['status' => 'error', 'message' => 'Anda harus membeli produk ini terlebih dahulu.'];
+                } elseif ($kuota_ulasan['sisa_kuota'] <= 0) {
+                    $response = ['status' => 'error', 'message' => 'Batas ulasan Anda untuk produk ini sudah habis.'];
+                } else {
+                    $data_ulasan = [
                     'id_user' => $id_user,
                     'id_produk' => $id_produk,
                     'rating' => $rating,
@@ -187,6 +191,7 @@ class User extends CI_Controller {
                 }
             }
         }
+    }
 
         $response['csrf_name'] = $this->security->get_csrf_token_name();
         $response['csrf_hash'] = $this->security->get_csrf_hash();

@@ -96,6 +96,7 @@ class Katalog extends CI_Controller {
             $data['isFavorited'] = $this->Favorit_model->is_favorited($user_id, $id);
             if($this->session->userdata('role') == 'pengguna') {
                 $data['sudah_mengulas'] = $this->Ulasan_model->sudah_mengulas($user_id, $id);
+                $data['kuota_ulasan'] = $this->Ulasan_model->sisa_kuota_ulasan($user_id, $id);
                 if($data['sudah_mengulas']) {
                     $data['ulasan_user'] = $this->Ulasan_model->get_ulasan_user_produk($user_id, $id);
                 }

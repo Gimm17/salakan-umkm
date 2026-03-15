@@ -404,10 +404,10 @@
                                 <div class="col-md-8">
                                     <!-- Add Review Form (for logged in users) -->
                                     <?php if($this->session->userdata('is_logged_in') && $this->session->userdata('role') == 'pengguna'): ?>
-                                        <?php if(!$sudah_mengulas): ?>
+                                        <?php if(isset($kuota_ulasan) && $kuota_ulasan['sisa_kuota'] > 0): ?>
                                         <div class="card mb-4">
                                             <div class="card-body">
-                                                <h6 class="fw-bold mb-3">Berikan Ulasan Anda</h6>
+                                                <h6 class="fw-bold mb-3">Berikan Ulasan Anda (Sisa Kuota: <?php echo $kuota_ulasan['sisa_kuota']; ?>)</h6>
                                                 <form id="reviewForm">
                                                     <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" id="csrf-token-review">
                                                     <input type="hidden" name="id_produk" value="<?php echo $produk['id']; ?>">
@@ -434,10 +434,15 @@
                                                 </form>
                                             </div>
                                         </div>
+                                        <?php elseif(isset($kuota_ulasan) && $kuota_ulasan['total_purchased'] == 0): ?>
+                                        <div class="alert alert-warning mb-4">
+                                            <i class="fas fa-shopping-bag me-2"></i>
+                                            Anda harus membeli produk ini terlebih dahulu sebelum dapat memberikan ulasan.
+                                        </div>
                                         <?php else: ?>
                                         <div class="alert alert-info mb-4">
                                             <i class="fas fa-info-circle me-2"></i>
-                                            Anda sudah memberikan ulasan untuk produk ini. 
+                                            Anda sudah menggunakan semua kesempatan ulasan untuk riwayat pembelian produk ini.
                                             <a href="<?php echo site_url('user/ulasan_saya'); ?>" class="alert-link">Lihat ulasan Anda</a>
                                         </div>
                                         <?php endif; ?>

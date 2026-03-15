@@ -30,6 +30,32 @@ class Ulasan_model extends CI_Model {
     }
 
     /**
+     * Mengecek sisa kesempatan (kuota) ulasan user untuk produk berdasarkan jumlah riwayat pembelian
+     */
+    public function sisa_kuota_ulasan($id_user, $id_produk)
+    {
+        $this->db->select_sum('oi.qty', 'total_qty');
+        $this->db->from('orders o');
+        $this->db->join('order_items oi', 'o.order_db_id = oi.order_db_id');
+        $this->db->where('o.id_user', $id_user);
+        $this->db->where('oi.id_produk', $id_produk);
+        $this->db->where_in('o.status', ['paid', 'settlement', 'capture']);
+        $result_buy = $this->db->get()->row();
+        
+        $total_purchased = ($result_buy && $result_buy->total_qty) ? (int)$result_buy->total_qty : 0;
+
+        $this->db->where('id_user', $id_user);
+        $this->db->where('id_produk', $id_produk);
+        $total_reviews = $this->db->count_all_results('produk_ulasan');
+
+        return [
+            'total_purchased' => $total_purchased,
+            'total_reviews' => $total_reviews,
+            'sisa_kuota' => max(0, $total_purchased - $total_reviews)
+        ];
+    }
+
+    /**
      * Mendapatkan semua ulasan untuk produk tertentu
      */
     public function get_ulasan_produk($id_produk, $limit = null, $offset = 0, $status = 'approved')

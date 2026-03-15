@@ -258,6 +258,13 @@ if($toko_wa && substr($toko_wa, 0, 2) == '08') {
         <a href="<?php echo site_url('user/orders'); ?>" class="btn rounded-pill py-2 text-white" style="background:var(--clr-primary)">
           <i class="fas fa-history me-2"></i>Lihat Riwayat Pembelian
         </a>
+        <?php if($isPaid && !empty($items)): 
+               $id_produk_ulasan = $items[0]['id_produk'] ?? ($items[0]['produk_id'] ?? 0);
+        ?>
+        <a href="<?php echo site_url('produk/' . $id_produk_ulasan . '#reviewForm'); ?>" class="btn btn-success rounded-pill py-2">
+          <i class="fas fa-star me-2"></i>Beri Ulasan Produk
+        </a>
+        <?php endif; ?>
         <?php endif; ?>
       </div>
     </div>

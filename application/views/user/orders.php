@@ -274,6 +274,14 @@ $status_info = [
               <i class="fab fa-whatsapp"></i>Seller
             </a>
             <?php endif; ?>
+
+            <?php if($order['status'] === 'paid' && !empty($items)): 
+               $id_produk_ulasan = $items[0]['id_produk'] ?? ($items[0]['produk_id'] ?? 0);
+            ?>
+            <a href="<?php echo site_url('produk/' . $id_produk_ulasan . '#reviewForm'); ?>" class="btn btn-sm btn-outline-primary rounded-pill">
+              <i class="fas fa-star me-1"></i>Beri Ulasan
+            </a>
+            <?php endif; ?>
           </div>
         </div>
       </div>
