@@ -20,7 +20,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | accessed via the default port.
 |
 */
-$config['base_url'] = 'http://localhost/salakan_umkm/';
+// Auto-detect HTTPS for production
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            ? 'https' : 'http';
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+if ($host === 'localhost' || strpos($host, 'localhost') !== false) {
+    $config['base_url'] = 'http://localhost/salakan_umkm/';
+} else {
+    $config['base_url'] = $protocol . '://' . $host . '/';
+}
 
 /*
 |--------------------------------------------------------------------------

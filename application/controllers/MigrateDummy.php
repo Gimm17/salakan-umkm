@@ -49,7 +49,7 @@ class MigrateDummy extends CI_Controller {
                         'deskripsi' => 'Nasi kuning dengan lauk ayam goreng, kering tempe, telur dadar iris, dan sambal terasi khas. Cocok untuk sarapan pagi.',
                         'harga' => 15000,
                         'stok' => 50,
-                        'gambar_produk' => 'produk_makanan_1_1773597712359.png',
+                        'gambar' => 'produk_makanan_1_1773597712359.png',
                         'id_kategori' => $cat_ids['makanan']
                     ],
                     [
@@ -57,7 +57,7 @@ class MigrateDummy extends CI_Controller {
                         'deskripsi' => 'Kue tradisional basah yang sangat lembut, manis, dan lumer di mulut. Terbuat dari bahan-bahan pilihan.',
                         'harga' => 20000,
                         'stok' => 30,
-                        'gambar_produk' => 'produk_makanan_2_1773597735590.png',
+                        'gambar' => 'produk_makanan_2_1773597735590.png',
                         'id_kategori' => $cat_ids['makanan']
                     ],
                     [
@@ -65,7 +65,7 @@ class MigrateDummy extends CI_Controller {
                         'deskripsi' => 'Rendang daging sapi empuk dengan bumbu rempah meresap yang dimasak perlahan selama 6 jam. Kemasan vacuum tahan lama.',
                         'harga' => 85000,
                         'stok' => 15,
-                        'gambar_produk' => 'produk_makanan_1_1773597712359.png', 
+                        'gambar' => 'produk_makanan_1_1773597712359.png', 
                         'id_kategori' => $cat_ids['makanan']
                     ]
                 ]
@@ -90,7 +90,7 @@ class MigrateDummy extends CI_Controller {
                         'deskripsi' => 'Es dawet asli dengan gula aren pekat murni dan santan segar. Sensasi dingin yang menyegarkan dahaga di siang hari.',
                         'harga' => 10000,
                         'stok' => 100,
-                        'gambar_produk' => 'produk_minuman_1_1773597758641.png',
+                        'gambar' => 'produk_minuman_1_1773597758641.png',
                         'id_kategori' => $cat_ids['minuman']
                     ],
                     [
@@ -98,7 +98,7 @@ class MigrateDummy extends CI_Controller {
                         'deskripsi' => 'Kopi hitam murni dari biji kopi robusta pilihan dari dataran tinggi Salakan. Aroma kuat dan rasa mantap.',
                         'harga' => 25000,
                         'stok' => 45,
-                        'gambar_produk' => 'produk_minuman_1_1773597758641.png', 
+                        'gambar' => 'produk_minuman_1_1773597758641.png', 
                         'id_kategori' => $cat_ids['minuman']
                     ],
                     [
@@ -106,7 +106,7 @@ class MigrateDummy extends CI_Controller {
                         'deskripsi' => 'Minuman herbal tradisional dengan campuran jahe, rempah, dan susu. Sangat baik untuk menghangatkan tubuh dan menjaga stamina.',
                         'harga' => 15000,
                         'stok' => 60,
-                        'gambar_produk' => 'produk_minuman_1_1773597758641.png', 
+                        'gambar' => 'produk_minuman_1_1773597758641.png', 
                         'id_kategori' => $cat_ids['minuman']
                     ]
                 ]
@@ -131,7 +131,7 @@ class MigrateDummy extends CI_Controller {
                         'deskripsi' => 'Tas anyaman rotan buatan tangan dengan desain modern namun tetap mempertahankan nilai tradisional. Sangat cocok untuk gaya kasual.',
                         'harga' => 150000,
                         'stok' => 20,
-                        'gambar_produk' => 'produk_kerajinan_1_1773597778912.png',
+                        'gambar' => 'produk_kerajinan_1_1773597778912.png',
                         'id_kategori' => $cat_ids['kerajinan']
                     ],
                     [
