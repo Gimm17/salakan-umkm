@@ -1,7 +1,7 @@
 <?php
 // application/views/user/orders.php
 // Riwayat Pembelian — dalam layouts/dashboard_layout
-$EXPIRE_HOURS = 24; // batas waktu pending sebelum otomatis gagal (jam)
+$EXPIRE_MINUTES = 10; // batas waktu pending sebelum otomatis gagal (menit)
 
 $statuses = [
     'all'     => ['label' => 'Semua',    'icon' => 'list'],
@@ -12,14 +12,14 @@ $statuses = [
 $active  = isset($active_filter) ? $active_filter : 'all';
 $orders  = isset($orders) ? $orders : [];
 
-// Auto-expire: tandai pending yang sudah > EXPIRE_HOURS jadi failed (client-side display saja)
+// Auto-expire: tandai pending yang sudah > EXPIRE_MINUTES jadi failed (client-side display saja)
 // Update DB sebenarnya dilakukan di controller saat orders() dipanggil
 $now = time();
 foreach ($orders as &$o) {
     if ($o['status'] === 'pending') {
         $created_ts = strtotime($o['created_at'] ?? 'now');
-        $elapsed_h  = ($now - $created_ts) / 3600;
-        if ($elapsed_h > $EXPIRE_HOURS) {
+        $elapsed_m  = ($now - $created_ts) / 60;
+        if ($elapsed_m > $EXPIRE_MINUTES) {
             $o['status'] = 'expired'; // hanya untuk display
         }
     }
@@ -165,9 +165,9 @@ $status_info = [
     
     // Hitung sisa waktu untuk pending
     $created_ts  = strtotime($order['created_at'] ?? 'now');
-    $expire_ts   = $created_ts + ($EXPIRE_HOURS * 3600);
+    $expire_ts   = $created_ts + ($EXPIRE_MINUTES * 60);
     $sisa_detik  = max(0, $expire_ts - $now);
-    $pct_expired = min(100, round(($now - $created_ts) / ($EXPIRE_HOURS * 3600) * 100));
+    $pct_expired = min(100, round(($now - $created_ts) / ($EXPIRE_MINUTES * 60) * 100));
     $sisa_jam    = floor($sisa_detik / 3600);
     $sisa_menit  = floor(($sisa_detik % 3600) / 60);
     $can_repay   = ($order['status'] === 'pending') && ($sisa_detik > 0);
@@ -245,7 +245,7 @@ $status_info = [
           <!-- Timer countdown untuk pending -->
           <?php if($order['status'] === 'pending' && $sisa_detik > 0): ?>
           <div class="countdown-text mb-2" id="cd-<?php echo htmlspecialchars($order['order_id']); ?>">
-            <i class="fas fa-clock me-1"></i>Batas bayar: <?php echo $sisa_jam; ?>j <?php echo $sisa_menit; ?>m lagi
+            <i class="fas fa-clock me-1"></i>Batas bayar: <?php echo $sisa_jam > 0 ? $sisa_jam . 'j ' : ''; ?><?php echo $sisa_menit; ?>m lagi
           </div>
           <?php elseif($order['status'] === 'pending'): ?>
           <div class="text-danger mb-2" style="font-size:.76rem">
