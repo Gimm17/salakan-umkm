@@ -165,10 +165,6 @@ class User extends CI_Controller {
                 $response = ['status' => 'error', 'message' => 'Produk tidak valid.'];
             } elseif ($rating < 1 || $rating > 5) {
                 $response = ['status' => 'error', 'message' => 'Rating harus antara 1-5.'];
-            } elseif (empty($komentar)) {
-                $response = ['status' => 'error', 'message' => 'Komentar wajib diisi.'];
-            } elseif (strlen($komentar) < 10) {
-                $response = ['status' => 'error', 'message' => 'Komentar minimal 10 karakter.'];
             } else {
                 $kuota_ulasan = $this->Ulasan_model->sisa_kuota_ulasan($id_user, $id_produk);
                 if ($kuota_ulasan['total_purchased'] == 0) {
@@ -236,10 +232,6 @@ class User extends CI_Controller {
                 $response = ['status' => 'error', 'message' => 'Ulasan tidak ditemukan atau bukan milik Anda.'];
             } elseif ($rating < 1 || $rating > 5) {
                 $response = ['status' => 'error', 'message' => 'Rating harus antara 1-5.'];
-            } elseif (empty($komentar)) {
-                $response = ['status' => 'error', 'message' => 'Komentar wajib diisi.'];
-            } elseif (strlen($komentar) < 10) {
-                $response = ['status' => 'error', 'message' => 'Komentar minimal 10 karakter.'];
             } else {
                 $data_update = [
                     'rating' => $rating,

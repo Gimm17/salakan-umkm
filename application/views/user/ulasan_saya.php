@@ -172,7 +172,7 @@
                     <div class="mb-3">
                         <label for="editKomentar" class="form-label fw-semibold">Komentar</label>
                         <textarea class="form-control" id="editKomentar" name="komentar" rows="4" 
-                                placeholder="Ceritakan pengalaman Anda dengan produk ini..." required></textarea>
+                                placeholder="Ceritakan pengalaman Anda dengan produk ini... (opsional)"></textarea>
                     </div>
                 </form>
             </div>
@@ -273,10 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        if (komentar.length < 10) {
-            Swal.fire('Peringatan', 'Komentar minimal 10 karakter.', 'warning');
-            return;
-        }
+        
         
         const originalText = this.innerHTML;
         this.disabled = true;
