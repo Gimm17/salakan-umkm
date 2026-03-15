@@ -468,7 +468,9 @@ $config['csrf_cookie_name'] = 'csrf_salakan_cookie';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = TRUE;
 $config['csrf_exclude_uris'] = array(
-    'payment/ipaymu/notify'  // iPaymu callback harus bypass CSRF
+    'payment/ipaymu/notify',  // iPaymu callback harus bypass CSRF
+    'ipaymu/create',          // AJAX payment endpoint - proteksi via session + method check
+    'ipaymu/notify'           // iPaymu notify callback
 );
 
 /*
