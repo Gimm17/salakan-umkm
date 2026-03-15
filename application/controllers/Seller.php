@@ -310,7 +310,7 @@ class Seller extends CI_Controller {
             }
             
             $config['upload_path']   = $upload_path;
-            $config['allowed_types'] = 'gif|jpg|jpeg|png';
+            $config['allowed_types'] = 'gif|jpg|jpeg|png|webp';
             $config['max_size']      = 2048; // 2MB
             $config['encrypt_name']  = TRUE;
             $this->upload->initialize($config);
@@ -380,8 +380,8 @@ class Seller extends CI_Controller {
             if (!empty($_FILES['gambar_produk']['name'])) {
                 $upload_path = FCPATH . 'public/img/produk/';
                 $config['upload_path']   = $upload_path;
-                $config['allowed_types'] = 'gif|jpg|jpeg|png';
-                $config['max_size']      = 2048;
+                $config['allowed_types'] = 'gif|jpg|jpeg|png|webp';
+                $config['max_size']      = 2048; // 2MB
                 $config['encrypt_name']  = TRUE;
                 $this->upload->initialize($config);
 
@@ -453,8 +453,8 @@ class Seller extends CI_Controller {
                 }
                 
                 $config['upload_path']   = $upload_path;
-                $config['allowed_types'] = 'gif|jpg|jpeg|png';
-                $config['max_size']      = 1024; // 1MB
+                $config['allowed_types'] = 'gif|jpg|jpeg|png|webp';
+                $config['max_size']      = 2048; // 2MB
                 $config['encrypt_name']  = TRUE;
                 $this->upload->initialize($config);
 
