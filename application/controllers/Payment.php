@@ -182,8 +182,21 @@ class Payment extends CI_Controller {
             }
 
             if ($order) {
+                // Cek status real-time ke midtrans (jika pending)
+                if ($order['status'] === 'pending') {
+                    $midtrans_status = $this->_midtrans_check_status($order_id);
+                    if ($midtrans_status) {
+                        $ts = $midtrans_status['transaction_status'] ?? '';
+                        $fs = $midtrans_status['fraud_status'] ?? '';
+                        
+                        if ($ts === 'capture')      { $status_in = ($fs === 'accept') ? 'paid' : 'pending'; }
+                        elseif ($ts === 'settlement'){ $status_in = 'paid'; }
+                        elseif (in_array($ts, array('cancel','deny','expire'))) { $status_in = 'failed'; }
+                    }
+                }
+
                 // Update status jika confirmed
-                if (in_array($status_in, array('settlement', 'capture'))) {
+                if (in_array($status_in, array('settlement', 'capture', 'paid'))) {
                     $new_status = 'paid';
                     if (method_exists($this->Order_model, 'update_by_order_id')) {
                         $this->Order_model->update_by_order_id($order_id, array('status' => 'paid'));
@@ -194,8 +207,8 @@ class Payment extends CI_Controller {
                 }
 
                 // Ambil items
-                if (method_exists($this->Order_model, 'get_items')) {
-                    $order_items = $this->Order_model->get_items($order_id);
+                if (method_exists($this->Order_model, 'items_by_order_id')) {
+                    $order_items = $this->Order_model->items_by_order_id($order_id);
                 } else {
                     $order_items = $this->db->where('order_id', $order_id)->get('order_items')->result_array();
                 }
@@ -256,6 +269,37 @@ class Payment extends CI_Controller {
             $this->db->where('order_id', $order_id)->update('orders', array('status' => $new_status));
         }
         echo 'OK';
+    }
+
+    /**
+     * Helper: Cek status Midtrans langsung ke API untuk memastikan data sinkron walau webhook telat
+     */
+    private function _midtrans_check_status($order_id) {
+        $is_sandbox = !empty($this->mt['is_sandbox']);
+        $url        = $is_sandbox
+            ? "https://api.sandbox.midtrans.com/v2/{$order_id}/status"
+            : "https://api.midtrans.com/v2/{$order_id}/status";
+
+        $auth = base64_encode($this->mt['server_key'] . ':');
+        $ch   = curl_init($url);
+        curl_setopt_array($ch, array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => array(
+                'Accept: application/json',
+                'Authorization: Basic ' . $auth,
+            ),
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+        ));
+        $resp = curl_exec($ch);
+        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http >= 200 && $http < 300) {
+            return json_decode($resp, true);
+        }
+        return false;
     }
 
     /**
