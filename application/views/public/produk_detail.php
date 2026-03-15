@@ -1037,21 +1037,60 @@ document.addEventListener('DOMContentLoaded', function(){
   var btn = document.getElementById('btn-bayar-sekarang');
   if(!btn) return;
   btn.addEventListener('click', function(){
+    // Ambil CSRF token yang selalu fresh dari input yang ada di halaman
+    var csrfInput = document.getElementById('csrf-token-input');
+    var csrfName  = csrfInput ? csrfInput.name  : '<?php echo $this->security->get_csrf_token_name(); ?>';
+    var csrfHash  = csrfInput ? csrfInput.value : '<?php echo $this->security->get_csrf_hash(); ?>';
+
+    var originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
+
+    var params = new URLSearchParams({
+      produk_id: "<?php echo $produk['id']; ?>",
+      qty: 1
+    });
+    params.append(csrfName, csrfHash);
+
     fetch("<?php echo site_url('ipaymu/create'); ?>", {
       method: 'POST',
-      headers: {'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','X-Requested-With':'XMLHttpRequest'},
-      body: new URLSearchParams({
-        produk_id: "<?php echo $produk['id']; ?>",
-        qty: 1,
-        "<?php echo $this->security->get_csrf_token_name(); ?>":"<?php echo $this->security->get_csrf_hash(); ?>"
-      })
-    }).then(function(r){
-      if(!r.ok){ return r.text().then(function(t){ throw new Error('HTTP '+r.status+' '+t.slice(0,200));}); }
+      headers: {
+        'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With':'XMLHttpRequest'
+      },
+      body: params
+    })
+    .then(function(r){
+      // Update CSRF token baru dari response header jika ada
+      var newToken = r.headers.get('X-CSRF-Token');
+      if(newToken && csrfInput) csrfInput.value = newToken;
+
+      if(!r.ok){
+        return r.text().then(function(t){
+          var msg = 'HTTP '+r.status;
+          if(r.status === 403) msg += ' – Sesi habis, silakan refresh halaman dan coba lagi.';
+          else if(r.status === 502) msg += ' – Koneksi ke payment gateway gagal. Pastikan konfigurasi iPaymu sudah benar.';
+          else msg += ': ' + t.slice(0, 300);
+          throw new Error(msg);
+        });
+      }
       return r.json();
-    }).then(function(res){
-      if(res.redirect_url){ window.location = res.redirect_url; }
-      else { alert('Gagal membuat pembayaran: ' + (res.error||'unknown')); }
-    }).catch(function(err){ alert('Error: ' + err.message); });
+    })
+    .then(function(res){
+      if(res.redirect_url){
+        window.location = res.redirect_url;
+      } else {
+        var errMsg = res.error || (res.detail ? JSON.stringify(res.detail) : 'unknown error');
+        Swal.fire('Pembayaran Gagal', 'Gagal membuat pembayaran: ' + errMsg, 'error');
+      }
+    })
+    .catch(function(err){
+      Swal.fire('Oops...', err.message, 'error');
+    })
+    .finally(function(){
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    });
   });
 });
 </script>
