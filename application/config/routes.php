@@ -166,8 +166,21 @@ $route['seller/hapus_ulasan/(:num)'] = 'seller/hapus_ulasan/$1';
 $route['auth/forgot_password'] = 'auth/forgot_password';
 $route['auth/reset_password/(:any)'] = 'auth/reset_password/$1';
 
-// iPaymu routes
+// iPaymu legacy (biarkan agar URL lama tidak 404)
 $route['ipaymu/create'] = 'ipaymu/create';
 $route['payment/ipaymu/notify'] = 'ipaymu/notify';
 $route['payment/ipaymu/return'] = 'ipaymu/return';
 $route['payment/ipaymu/cancel'] = 'ipaymu/cancel';
+
+// --- Midtrans Payment routes ---
+$route['payment/checkout/(:num)'] = 'payment/checkout/$1';
+$route['payment/checkout']        = 'payment/checkout';
+$route['payment/create']          = 'payment/create';
+$route['payment/success']         = 'payment/success';
+$route['payment/notify']          = 'payment/notify';
+$route['payment/finish']          = 'payment/success';  // alias finish → success
+
+// --- User: Riwayat Pembelian ---
+$route['user/orders']               = 'user/orders';
+$route['user/orders/(:any)']        = 'user/order_detail/$1';
+

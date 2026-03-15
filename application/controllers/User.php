@@ -6,7 +6,7 @@ class User extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        $this->load->model(['User_model', 'Favorit_model', 'Ulasan_model']);
+        $this->load->model(['User_model', 'Favorit_model', 'Ulasan_model', 'Order_model']);
         $this->load->library(['session', 'form_validation', 'upload']);
         $this->load->helper(['url', 'form']);
 
@@ -455,5 +455,57 @@ class User extends CI_Controller {
         $this->session->set_flashdata('success', 'Email berhasil diperbarui!');
         redirect('user/profile');
     }
-}
 
+    /**
+     * Halaman Histori / Riwayat Pembelian User
+     */
+    public function orders()
+    {
+        $user_id = $this->session->userdata('id');
+        $filter  = $this->input->get('status', TRUE) ?: 'all';
+
+        $this->db->select('o.*, t.nama_toko, t.no_wa as toko_wa');
+        $this->db->from('orders o');
+        $this->db->join('toko t', 'o.id_toko = t.id', 'left');
+        $this->db->where('o.id_user', $user_id);
+        if ($filter !== 'all') {
+            $this->db->where('o.status', $filter);
+        }
+        $this->db->order_by('o.id', 'DESC');
+        $orders = $this->db->get()->result_array();
+
+        // Sertakan items masing-masing order
+        foreach ($orders as &$order) {
+            $order['items'] = $this->Order_model->items_by_order_id($order['order_id']);
+        }
+        unset($order);
+
+        $data['title']         = 'Riwayat Pembelian';
+        $data['orders']        = $orders;
+        $data['active_filter'] = $filter;
+        $data['page_content']  = 'user/orders';
+        $this->load->view('layouts/dashboard_layout', $data);
+    }
+
+    /**
+     * Detail satu pesanan (modal/standalone jika diperlukan)
+     */
+    public function order_detail($order_id = '')
+    {
+        $user_id = $this->session->userdata('id');
+        if (!$order_id) { show_404(); return; }
+
+        $order = $this->Order_model->find_by_order_id($order_id);
+        if (!$order || (int)$order['id_user'] !== (int)$user_id) { show_404(); return; }
+
+        $order['items'] = $this->Order_model->items_by_order_id($order_id);
+        $toko = $this->db->get_where('toko', ['id' => $order['id_toko']])->row_array();
+
+        $data['title']        = 'Detail Pesanan #' . $order_id;
+        $data['order']        = $order;
+        $data['order_items']  = $order['items'];
+        $data['toko']         = $toko;
+        $data['page_content'] = 'user/order_detail';
+        $this->load->view('layouts/dashboard_layout', $data);
+    }
+}
