@@ -190,6 +190,7 @@ class Payment extends CI_Controller {
         }
 
         $this->session->set_userdata('last_order_id', $order_id);
+        $this->session->set_userdata('last_midtrans_order_id', $midtrans_order_id);
         $this->output->set_output(json_encode(array(
             'token'    => $resp['token'],
             'order_id' => $order_id,
@@ -215,9 +216,14 @@ class Payment extends CI_Controller {
             }
 
             if ($order) {
-                // Selalu cek status real-time ke Midtrans (bukan hanya saat pending)
-                // karena user diredirect ke sini segera setelah bayar, webhook belum tentu masuk
-                $midtrans_status = $this->_midtrans_check_status($order_id);
+                // Cek status real-time ke Midtrans
+                // Coba pakai midtrans_order_id (untuk repay) atau order_id biasa
+                $mt_oid = $this->session->userdata('last_midtrans_order_id') ?: $order_id;
+                $midtrans_status = $this->_midtrans_check_status($mt_oid);
+                if (!$midtrans_status) {
+                    // Fallback: coba order_id asli
+                    $midtrans_status = $this->_midtrans_check_status($order_id);
+                }
                 if ($midtrans_status) {
                     $ts = $midtrans_status['transaction_status'] ?? '';
                     $fs = $midtrans_status['fraud_status'] ?? '';
@@ -284,15 +290,18 @@ class Payment extends CI_Controller {
         $data = json_decode($raw, true);
         if (!$data) { http_response_code(400); echo 'Invalid'; return; }
 
-        $order_id           = $data['order_id']           ?? '';
+        $midtrans_order_id  = $data['order_id']           ?? '';
         $transaction_status = $data['transaction_status'] ?? '';
         $fraud_status       = $data['fraud_status']       ?? '';
         $status_code        = $data['status_code']        ?? '';
         $gross_amount       = $data['gross_amount']       ?? '';
         $server_key         = $this->mt['server_key'];
 
+        // Strip suffix -RXXXX dari order_id untuk mendapatkan order_id asli di DB
+        $order_id = preg_replace('/-R\d+$/', '', $midtrans_order_id);
+
         // Verifikasi signature Midtrans
-        $expected_sig = hash('sha512', $order_id . $status_code . $gross_amount . $server_key);
+        $expected_sig = hash('sha512', $midtrans_order_id . $status_code . $gross_amount . $server_key);
         $recv_sig     = $data['signature_key'] ?? '';
         if ($recv_sig !== $expected_sig) { http_response_code(403); echo 'Bad sig'; return; }
 
