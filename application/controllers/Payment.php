@@ -39,7 +39,7 @@ class Payment extends CI_Controller {
         $produk = $this->Produk_model->get_produk($produk_id);
         if (!$produk) show_404();
 
-        $toko = $this->Toko_model->get_toko($produk['id_toko']);
+        $toko = $this->Toko_model->get_toko_by_id($produk['id_toko']);
 
         $data = array(
             'title'  => 'Checkout — ' . $produk['nama_produk'],
@@ -82,7 +82,7 @@ class Payment extends CI_Controller {
             return;
         }
 
-        $toko      = $this->Toko_model->get_toko($produk['id_toko']);
+        $toko      = $this->Toko_model->get_toko_by_id($produk['id_toko']);
         $order_id  = 'ORDER-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
         $buyer_id  = (int) ($this->session->userdata('id') ?: 0);
         $gross     = (int) $produk['harga'] * $qty;
@@ -204,7 +204,7 @@ class Payment extends CI_Controller {
 
                 // Ambil toko
                 if (!empty($order['id_toko'])) {
-                    $toko = $this->Toko_model->get_toko($order['id_toko']);
+                    $toko = $this->Toko_model->get_toko_by_id($order['id_toko']);
                 }
 
                 // Send email jika paid
