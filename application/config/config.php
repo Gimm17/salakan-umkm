@@ -468,9 +468,10 @@ $config['csrf_cookie_name'] = 'csrf_salakan_cookie';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = TRUE;
 $config['csrf_exclude_uris'] = array(
-    'payment/ipaymu/notify',  // iPaymu callback harus bypass CSRF
-    'ipaymu/create',          // AJAX payment endpoint - proteksi via session + method check
-    'ipaymu/notify'           // iPaymu notify callback
+    'payment/notify',   // Midtrans webhook callback harus bypass CSRF
+    'payment/finish',   // Midtrans finish redirect
+    'payment/create',   // AJAX payment token endpoint
+    'ipaymu/notify',    // Legacy - biarkan ada untuk keamanan
 );
 
 /*

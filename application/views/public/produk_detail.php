@@ -1032,12 +1032,15 @@ img[onclick]:hover {
     }
 }
 </style>
+<!-- Midtrans Snap.js -->
+<script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="<?php echo 'CHANGE_ME_MIDTRANS_CLIENT_KEY'; ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   var btn = document.getElementById('btn-bayar-sekarang');
-  if(!btn) return;
+  if (!btn) return;
+
   btn.addEventListener('click', function(){
-    // Ambil CSRF token yang selalu fresh dari input yang ada di halaman
     var csrfInput = document.getElementById('csrf-token-input');
     var csrfName  = csrfInput ? csrfInput.name  : '<?php echo $this->security->get_csrf_token_name(); ?>';
     var csrfHash  = csrfInput ? csrfInput.value : '<?php echo $this->security->get_csrf_hash(); ?>';
@@ -1046,48 +1049,68 @@ document.addEventListener('DOMContentLoaded', function(){
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
 
-    var params = new URLSearchParams({
-      produk_id: "<?php echo $produk['id']; ?>",
-      qty: 1
-    });
+    var params = new URLSearchParams({ produk_id: "<?php echo $produk['id']; ?>", qty: 1 });
     params.append(csrfName, csrfHash);
 
-    fetch("<?php echo site_url('ipaymu/create'); ?>", {
+    // Minta token Snap dari server
+    fetch("<?php echo site_url('payment/create'); ?>", {
       method: 'POST',
       headers: {
-        'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With':'XMLHttpRequest'
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: params
     })
-    .then(function(r){
-      // Update CSRF token baru dari response header jika ada
-      var newToken = r.headers.get('X-CSRF-Token');
-      if(newToken && csrfInput) csrfInput.value = newToken;
-
-      if(!r.ok){
-        return r.text().then(function(t){
-          var msg = 'HTTP '+r.status;
-          if(r.status === 403) msg += ' – Sesi habis, silakan refresh halaman dan coba lagi.';
-          else if(r.status === 502) msg += ' – Koneksi ke payment gateway gagal. Pastikan konfigurasi iPaymu sudah benar.';
-          else msg += ': ' + t.slice(0, 300);
+    .then(function(r) {
+      if (csrfInput) {
+        var newToken = r.headers.get('X-CSRF-Token');
+        if (newToken) csrfInput.value = newToken;
+      }
+      if (!r.ok) {
+        return r.text().then(function(t) {
+          var parsed = null;
+          try { parsed = JSON.parse(t); } catch(e) {}
+          var msg = parsed && parsed.error ? parsed.error : ('HTTP ' + r.status);
+          if (parsed && parsed.detail) msg += ' – ' + JSON.stringify(parsed.detail);
           throw new Error(msg);
         });
       }
       return r.json();
     })
-    .then(function(res){
-      if(res.redirect_url){
-        window.location = res.redirect_url;
-      } else {
-        var errMsg = res.error || (res.detail ? JSON.stringify(res.detail) : 'unknown error');
-        Swal.fire('Pembayaran Gagal', 'Gagal membuat pembayaran: ' + errMsg, 'error');
-      }
+    .then(function(res) {
+      if (!res.token) throw new Error('Token Midtrans tidak ditemukan: ' + JSON.stringify(res));
+
+      // Buka popup pembayaran Midtrans Snap
+      snap.pay(res.token, {
+        onSuccess: function(result) {
+          Swal.fire('Pembayaran Berhasil!', 'Terima kasih, pesanan Anda sedang diproses.', 'success').then(function() {
+            window.location = "<?php echo site_url('payment/finish'); ?>?order_id=" + res.order_id + "&transaction_status=settlement";
+          });
+        },
+        onPending: function(result) {
+          Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda.', 'info');
+        },
+        onError: function(result) {
+          Swal.fire('Pembayaran Gagal', 'Terjadi kesalahan saat proses pembayaran.', 'error');
+        },
+        onClose: function() {
+          // User menutup popup tanpa bayar
+          Swal.fire({
+            icon: 'warning',
+            title: 'Pembayaran Dibatalkan',
+            text: 'Anda menutup halaman pembayaran.',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        }
+      });
     })
-    .catch(function(err){
+    .catch(function(err) {
       Swal.fire('Oops...', err.message, 'error');
     })
-    .finally(function(){
+    .finally(function() {
       btn.disabled = false;
       btn.innerHTML = originalHtml;
     });
