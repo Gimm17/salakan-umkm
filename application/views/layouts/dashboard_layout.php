@@ -703,22 +703,6 @@
                                     <span class="fw-bold"><?php echo htmlspecialchars($this->session->userdata('nama')); ?></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <?php
-                                        $profile_url = '';
-                                        if ($role == 'admin') {
-                                            $profile_url = site_url('admin/profile');
-                                        } elseif ($role == 'penjual') {
-                                            $profile_url = site_url('seller/profile');
-                                        } else {
-                                            $profile_url = site_url('user/profile');
-                                        }
-                                    ?>
-                                    <li>
-                                        <a class="dropdown-item" href="<?php echo $profile_url; ?>">
-                                            <i class="fas fa-user-edit fa-fw me-2 text-muted"></i>Edit Profil
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item text-danger" href="<?php echo site_url('auth/logout'); ?>">
                                             <i class="fas fa-sign-out-alt fa-fw me-2"></i>Logout
