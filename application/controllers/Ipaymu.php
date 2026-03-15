@@ -23,7 +23,8 @@ class Ipaymu extends CI_Controller {
         $ts  = gmdate('Y-m-d H:i:s');
 
         $body = json_encode($payload);
-        $stringToSign = 'POST:' . $va . ':' . $body . ':' . $key;
+        $bodyHash = strtolower(hash('sha256', $body)); // iPaymu v2: body harus di-SHA256 dulu
+        $stringToSign = 'POST:' . $va . ':' . $bodyHash . ':' . $key;
         $signature = hash_hmac('sha256', $stringToSign, $key);
 
         $ch = curl_init($url);
