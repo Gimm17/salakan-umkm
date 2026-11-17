@@ -107,6 +107,10 @@ class Katalog extends CI_Controller {
         $data['ulasan_produk'] = $this->Ulasan_model->get_ulasan_produk($id, 5);
         $data['total_ulasan'] = $this->Ulasan_model->count_ulasan_produk($id);
 
+        $this->config->load('midtrans', TRUE);
+        $mt_cfg = $this->config->item('midtrans', 'midtrans');
+        $data['midtrans_client_key'] = is_array($mt_cfg) ? ($mt_cfg['client_key'] ?? '') : '';
+
         $data['page_content'] = 'public/produk_detail';
         $this->load->view('layouts/public_layout', $data);
     }

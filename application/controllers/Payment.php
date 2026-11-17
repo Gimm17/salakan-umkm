@@ -15,15 +15,14 @@ class Payment extends CI_Controller {
         $this->load->library(array('session', 'email'));
         $this->load->model(array('Order_model', 'Produk_model', 'Toko_model'));
 
-        // Load config — hardcoded fallback jika config section tidak terbaca
         $this->config->load('midtrans', TRUE);
         $cfg = $this->config->item('midtrans', 'midtrans');
-        if (!$cfg || empty($cfg['server_key'])) {
+        if (!is_array($cfg)) {
             $cfg = array(
-                'merchant_id' => 'G331745803',
-                'client_key'  => 'CHANGE_ME_MIDTRANS_CLIENT_KEY',
-                'server_key'  => 'CHANGE_ME_MIDTRANS_SERVER_KEY',
-                'is_sandbox'  => true,
+                'merchant_id' => getenv('MIDTRANS_MERCHANT_ID') ?: '',
+                'client_key'  => getenv('MIDTRANS_CLIENT_KEY') ?: '',
+                'server_key'  => getenv('MIDTRANS_SERVER_KEY') ?: '',
+                'is_sandbox'  => getenv('MIDTRANS_IS_SANDBOX') !== 'false',
             );
         }
         $this->mt = $cfg;
@@ -42,9 +41,10 @@ class Payment extends CI_Controller {
         $toko = $this->Toko_model->get_toko_by_id($produk['id_toko']);
 
         $data = array(
-            'title'  => 'Checkout — ' . $produk['nama_produk'],
-            'produk' => $produk,
-            'toko'   => $toko,
+            'title'               => 'Checkout — ' . $produk['nama_produk'],
+            'produk'              => $produk,
+            'toko'                => $toko,
+            'midtrans_client_key' => $this->mt['client_key'] ?? '',
         );
         $data['page_content'] = 'public/checkout';
         $this->load->view('layouts/public_layout', $data);

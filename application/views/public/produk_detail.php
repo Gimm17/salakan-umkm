@@ -1032,7 +1032,7 @@ img[onclick]:hover {
 </style>
 <!-- Midtrans Snap.js -->
 <script src="https://app.sandbox.midtrans.com/snap/snap.js"
-        data-client-key="<?php echo 'CHANGE_ME_MIDTRANS_CLIENT_KEY'; ?>"></script>
+        data-client-key="<?php echo html_escape($midtrans_client_key ?? (getenv('MIDTRANS_CLIENT_KEY') ?: '')); ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   var btn = document.getElementById('btn-bayar-sekarang');

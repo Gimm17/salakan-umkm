@@ -203,7 +203,7 @@ $csrf_hash    = $this->security->get_csrf_hash();
 
 <!-- Midtrans Snap.js -->
 <script src="https://app.sandbox.midtrans.com/snap/snap.js"
-        data-client-key="<?php echo 'CHANGE_ME_MIDTRANS_CLIENT_KEY'; ?>"></script>
+        data-client-key="<?php echo html_escape($midtrans_client_key ?? (getenv('MIDTRANS_CLIENT_KEY') ?: '')); ?>"></script>
 <script>
 (function(){
   var harga   = <?php echo $produk_harga; ?>;

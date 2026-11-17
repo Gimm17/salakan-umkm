@@ -75,10 +75,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'gimmhost_banggaiumkm', // Sesuaikan dengan username database Anda
-	'password' => 'CHANGE_ME_DB_PASSWORD', // Sesuaikan dengan password database Anda
-	'database' => 'gimmhost_banggaiumkm', // Nama database yang sudah dibuat
+	'hostname' => getenv('DB_HOST') ?: 'localhost',
+	'username' => getenv('DB_USERNAME') ?: 'root',
+	'password' => getenv('DB_PASSWORD') ?: '',
+	'database' => getenv('DB_DATABASE') ?: 'salakan_umkm',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
