@@ -16,4 +16,4 @@ Platform e-commerce pemberdayaan pelaku UMKM Salakan, Banggai Kepulauan — meng
 | Keranjang belanja & riwayat order | Kelola produk, stok & status pesanan | Manajemen pengguna & kategori |
 | Ulasan produk & checkout iPaymu | Laporan penjualan & balas ulasan | Pemantauan statistik platform |
 
-Panduan instalasi & konfigurasi server tercantum di [`deployment_guide.md`](deployment_guide.md).
+Skema database & environment template tersedia di [`database/`](database/) dan [`.env.example`](.env.example).
